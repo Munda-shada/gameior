@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gameior/features/members/data/members_repository.dart';
 import 'package:gameior/features/members/domain/member.dart';
+import 'package:gameior/features/members/domain/member_stats.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 
@@ -68,4 +69,12 @@ class GroupJoinRequests extends _$GroupJoinRequests {
     ref.invalidateSelf();
     ref.invalidate(groupContextProvider(groupId));
   }
+}
+
+@riverpod
+Future<MemberStats> memberStats(MemberStatsRef ref, {required String groupId, required String userId}) async {
+  return ref.watch(membersRepositoryProvider).fetchMemberStats(
+    groupId: groupId,
+    userId: userId,
+  );
 }

@@ -41,11 +41,20 @@ class GroupsTab extends ConsumerWidget {
       ),
       body: groupsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
+        error: (e, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Failed to load groups'),
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: AppSpacing.sm),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: Text('Failed to load groups:\n$e', 
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
               ElevatedButton(
                 onPressed: () => ref.invalidate(myGroupsNotifierProvider),
                 child: const Text('Retry'),
@@ -152,13 +161,77 @@ class GroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = group.myRole.name == 'host' || group.myRole.name == 'coHost';
+    final hasPendingDues = group.pendingDuesPaise > 0;
+    final hasPendingFromPlayers = group.pendingFromPlayersPaise > 0 && isAdmin;
+
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
-        title: Text(group.name),
-        subtitle: Text('Members: ${group.memberCount}'),
-        trailing: const Icon(Icons.chevron_right),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: () => context.push('/group/${group.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      group.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Members: ${group.memberCount}',
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              if (hasPendingDues || hasPendingFromPlayers) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    if (hasPendingDues)
+                      _buildDuesBadge(
+                        'You owe ₹${(group.pendingDuesPaise / 100).toStringAsFixed(0)}',
+                        Colors.red,
+                      ),
+                    if (hasPendingFromPlayers)
+                      _buildDuesBadge(
+                        'To collect ₹${(group.pendingFromPlayersPaise / 100).toStringAsFixed(0)}',
+                        Colors.blue,
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDuesBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

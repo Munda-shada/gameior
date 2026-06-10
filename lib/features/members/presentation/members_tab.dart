@@ -8,11 +8,18 @@ import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/member.dart';
+import 'package:gameior/features/members/data/members_repository.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 import 'package:gameior/shared/widgets/app_dialog.dart';
 import 'package:gameior/shared/widgets/app_empty_state.dart';
 import 'package:gameior/shared/widgets/app_loading_shimmer.dart';
+import 'package:gameior/features/members/presentation/widgets/member_stats_sheet.dart';
+
+final groupHasUnpaidDuesProvider = FutureProvider.family<bool, String>((ref, groupId) async {
+  final repo = ref.read(membersRepositoryProvider);
+  return repo.hasGroupUnpaidDues(groupId: groupId);
+});
 
 class MembersTab extends ConsumerStatefulWidget {
   final String groupId;
@@ -194,9 +201,28 @@ class MembersRosterView extends ConsumerWidget {
         final coHosts = members.where((m) => m.role == MemberRole.coHost).toList();
         final players = members.where((m) => m.role == MemberRole.player).toList();
 
+        final isAdmin = currentRole == MemberRole.host || currentRole == MemberRole.coHost;
+        final hasDuesAsync = ref.watch(groupHasUnpaidDuesProvider(groupId));
+        final hasDues = hasDuesAsync.valueOrNull ?? false;
+
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.base),
           children: [
+            if (isAdmin && hasDues)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.base),
+                child: AppButton(
+                  label: 'Remind Pending Dues',
+                  leadingIcon: Icons.notifications_active_outlined,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: () {
+                    // TODO: Call an Edge Function to dispatch actual push notifications
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Reminders sent to all members with pending dues!')),
+                    );
+                  },
+                ),
+              ),
             if (hosts.isNotEmpty) ...[
               const _SectionHeader(title: 'HOST'),
               ...hosts.map((m) => _MemberRow(groupId: groupId, member: m, currentRole: currentRole)),
@@ -326,211 +352,22 @@ class _MemberRow extends ConsumerWidget {
           member.phone,
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
         ),
-        trailing: (isAdmin && !isMe)
-            ? const Icon(Icons.more_vert, color: AppColors.textSecondary)
-            : null,
-        onTap: (isAdmin && !isMe)
-            ? () => _showMemberActionsSheet(context, ref)
-            : null,
+        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        onTap: () => _showMemberProfileSheet(context, ref),
       ),
     );
   }
 
-  void _showMemberActionsSheet(BuildContext context, WidgetRef ref) {
+  void _showMemberProfileSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return Container(
-          padding: const EdgeInsets.all(AppSpacing.base),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header details
-                Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: AppColors.border.withOpacity(0.3),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(member.emoji, style: const TextStyle(fontSize: 26)),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.base),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(member.displayName, style: AppTextStyles.headlineMedium),
-                          const SizedBox(height: 2),
-                          Text(member.phone, style: AppTextStyles.bodySmall),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.base),
-                const Divider(),
-                const SizedBox(height: AppSpacing.sm),
-
-                // Host-only actions (Role promotion/demotion and ownership transfer)
-                if (currentRole == MemberRole.host) ...[
-                  if (member.role == MemberRole.player)
-                    _ActionTile(
-                      icon: Icons.verified_user_outlined,
-                      label: 'Promote to Co-Host',
-                      onTap: () async {
-                        Navigator.pop(sheetContext);
-                        await ref.read(groupMembersProvider(groupId).notifier).updateRole(
-                              userId: member.userId,
-                              role: MemberRole.coHost,
-                            );
-                        _showSnackBar(context, '${member.displayName} promoted to Co-Host');
-                      },
-                    ),
-                  if (member.role == MemberRole.coHost)
-                    _ActionTile(
-                      icon: Icons.remove_moderator_outlined,
-                      label: 'Demote to Player',
-                      onTap: () async {
-                        Navigator.pop(sheetContext);
-                        await ref.read(groupMembersProvider(groupId).notifier).updateRole(
-                              userId: member.userId,
-                              role: MemberRole.player,
-                            );
-                        _showSnackBar(context, '${member.displayName} demoted to Player');
-                      },
-                    ),
-                  _ActionTile(
-                    icon: Icons.swap_horiz,
-                    label: 'Transfer Group Ownership',
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      _confirmOwnershipTransfer(context, ref);
-                    },
-                  ),
-                ],
-
-                // Delete member (Hosts can delete anyone, Co-Hosts can only delete Players)
-                if (currentRole == MemberRole.host ||
-                    (currentRole == MemberRole.coHost && member.role == MemberRole.player))
-                  _ActionTile(
-                    icon: Icons.person_remove_outlined,
-                    label: 'Remove from Group',
-                    isDestructive: true,
-                    onTap: () async {
-                      Navigator.pop(sheetContext);
-                      final confirm = await showAppDialog(
-                        context: context,
-                        title: 'Remove Member?',
-                        message: 'Are you sure you want to remove ${member.displayName} from this group?',
-                        confirmLabel: 'Remove',
-                        isDestructive: true,
-                      );
-                      if (confirm == true) {
-                        await ref.read(groupMembersProvider(groupId).notifier).removeMember(
-                              userId: member.userId,
-                            );
-                        _showSnackBar(context, '${member.displayName} removed from the group');
-                      }
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _confirmOwnershipTransfer(BuildContext context, WidgetRef ref) async {
-    final client = ref.read(supabaseClientProvider);
-    final myUserId = client.auth.currentUser?.id;
-    if (myUserId == null) return;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) {
-        return AlertDialog(
-          title: const Text('Transfer Ownership?'),
-          content: Text(
-            'Are you sure you want to transfer group ownership to ${member.displayName}? '
-            'You will be demoted to Co-Host and lose ownership privileges. This action cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx, false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => Navigator.pop(dialogCtx, true),
-              child: const Text('Transfer'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirm == true) {
-      try {
-        await ref.read(groupMembersProvider(groupId).notifier).transferOwnership(
-              oldHostId: myUserId,
-              newHostId: member.userId,
-            );
-        _showSnackBar(context, 'Ownership transferred to ${member.displayName} successfully!');
-      } catch (e) {
-        _showSnackBar(context, 'Failed to transfer ownership: $e');
-      }
-    }
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  const _ActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isDestructive ? AppColors.destructive : AppColors.textPrimary;
-    return ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(
-        label,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: color,
-          fontWeight: isDestructive ? FontWeight.bold : FontWeight.normal,
-        ),
+      builder: (ctx) => MemberStatsSheet(
+        groupId: groupId,
+        member: member,
+        currentUserRole: currentRole,
       ),
-      onTap: onTap,
     );
   }
 }

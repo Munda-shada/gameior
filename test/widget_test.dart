@@ -1,27 +1,37 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gameior/app.dart';
+import 'package:gameior/core/supabase/supabase_client.dart';
 
-// TODO: Uncomment this import once your app widget is ready
-// import 'package:gameior/main.dart'; 
+class MockSupabaseClient extends Mock implements SupabaseClient {}
 
 void main() {
   testWidgets('App-level smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+    final mockClient = MockSupabaseClient();
+
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(), // <-- Replace with your actual root widget name
+      ProviderScope(
+        overrides: [
+          supabaseClientProvider.overrideWithValue(mockClient),
+          authStateProvider.overrideWith((ref) {
+            return const Stream.empty();
+          }),
+          currentUserProvider.overrideWith((ref) {
+            return Future.value(null);
+          }),
+        ],
+        child: const GameiorApp(),
       ),
     );
 
-    // Verify that the app builds successfully.
-    expect(find.byType(MaterialApp), findsOneWidget); // <-- Replace here too
+    // Let the splash screen evaluate and route to login
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify that the app builds successfully and contains MaterialApp
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

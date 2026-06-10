@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Profile {
 
- String get id;@JsonKey(name: 'display_name') String get displayName; String? get phone; String get emoji;@JsonKey(name: 'upi_id') String? get upiId;@JsonKey(name: 'is_profile_complete') bool get isProfileComplete;@JsonKey(name: 'created_at') DateTime get createdAt;
+ String get id;@JsonKey(name: 'display_name') String get displayName; String? get phone; String get emoji;@JsonKey(name: 'upi_id') String? get upiId;@JsonKey(name: 'is_profile_complete') bool get isProfileComplete;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'notif_game_reminders') bool get notifGameReminders;@JsonKey(name: 'notif_waitlist_promotions') bool get notifWaitlistPromotions;@JsonKey(name: 'notif_payment_dues') bool get notifPaymentDues;@JsonKey(name: 'notif_matchday_lineups') bool get notifMatchdayLineups;@JsonKey(name: 'notif_delivery_mode') String get notifDeliveryMode;
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProfileCopyWith<Profile> get copyWith => _$ProfileCopyWithImpl<Profile>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.upiId, upiId) || other.upiId == upiId)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.upiId, upiId) || other.upiId == upiId)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notifGameReminders, notifGameReminders) || other.notifGameReminders == notifGameReminders)&&(identical(other.notifWaitlistPromotions, notifWaitlistPromotions) || other.notifWaitlistPromotions == notifWaitlistPromotions)&&(identical(other.notifPaymentDues, notifPaymentDues) || other.notifPaymentDues == notifPaymentDues)&&(identical(other.notifMatchdayLineups, notifMatchdayLineups) || other.notifMatchdayLineups == notifMatchdayLineups)&&(identical(other.notifDeliveryMode, notifDeliveryMode) || other.notifDeliveryMode == notifDeliveryMode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,phone,emoji,upiId,isProfileComplete,createdAt);
+int get hashCode => Object.hash(runtimeType,id,displayName,phone,emoji,upiId,isProfileComplete,createdAt,notifGameReminders,notifWaitlistPromotions,notifPaymentDues,notifMatchdayLineups,notifDeliveryMode);
 
 @override
 String toString() {
-  return 'Profile(id: $id, displayName: $displayName, phone: $phone, emoji: $emoji, upiId: $upiId, isProfileComplete: $isProfileComplete, createdAt: $createdAt)';
+  return 'Profile(id: $id, displayName: $displayName, phone: $phone, emoji: $emoji, upiId: $upiId, isProfileComplete: $isProfileComplete, createdAt: $createdAt, notifGameReminders: $notifGameReminders, notifWaitlistPromotions: $notifWaitlistPromotions, notifPaymentDues: $notifPaymentDues, notifMatchdayLineups: $notifMatchdayLineups, notifDeliveryMode: $notifDeliveryMode)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProfileCopyWith<$Res>  {
   factory $ProfileCopyWith(Profile value, $Res Function(Profile) _then) = _$ProfileCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String displayName, String? phone, String emoji,@JsonKey(name: 'upi_id') String? upiId,@JsonKey(name: 'is_profile_complete') bool isProfileComplete,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'display_name') String displayName, String? phone, String emoji,@JsonKey(name: 'upi_id') String? upiId,@JsonKey(name: 'is_profile_complete') bool isProfileComplete,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'notif_game_reminders') bool notifGameReminders,@JsonKey(name: 'notif_waitlist_promotions') bool notifWaitlistPromotions,@JsonKey(name: 'notif_payment_dues') bool notifPaymentDues,@JsonKey(name: 'notif_matchday_lineups') bool notifMatchdayLineups,@JsonKey(name: 'notif_delivery_mode') String notifDeliveryMode
 });
 
 
@@ -65,7 +65,7 @@ class _$ProfileCopyWithImpl<$Res>
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = null,Object? phone = freezed,Object? emoji = null,Object? upiId = freezed,Object? isProfileComplete = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = null,Object? phone = freezed,Object? emoji = null,Object? upiId = freezed,Object? isProfileComplete = null,Object? createdAt = null,Object? notifGameReminders = null,Object? notifWaitlistPromotions = null,Object? notifPaymentDues = null,Object? notifMatchdayLineups = null,Object? notifDeliveryMode = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,12 @@ as String?,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_t
 as String,upiId: freezed == upiId ? _self.upiId : upiId // ignore: cast_nullable_to_non_nullable
 as String?,isProfileComplete: null == isProfileComplete ? _self.isProfileComplete : isProfileComplete // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,notifGameReminders: null == notifGameReminders ? _self.notifGameReminders : notifGameReminders // ignore: cast_nullable_to_non_nullable
+as bool,notifWaitlistPromotions: null == notifWaitlistPromotions ? _self.notifWaitlistPromotions : notifWaitlistPromotions // ignore: cast_nullable_to_non_nullable
+as bool,notifPaymentDues: null == notifPaymentDues ? _self.notifPaymentDues : notifPaymentDues // ignore: cast_nullable_to_non_nullable
+as bool,notifMatchdayLineups: null == notifMatchdayLineups ? _self.notifMatchdayLineups : notifMatchdayLineups // ignore: cast_nullable_to_non_nullable
+as bool,notifDeliveryMode: null == notifDeliveryMode ? _self.notifDeliveryMode : notifDeliveryMode // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -159,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'notif_game_reminders')  bool notifGameReminders, @JsonKey(name: 'notif_waitlist_promotions')  bool notifWaitlistPromotions, @JsonKey(name: 'notif_payment_dues')  bool notifPaymentDues, @JsonKey(name: 'notif_matchday_lineups')  bool notifMatchdayLineups, @JsonKey(name: 'notif_delivery_mode')  String notifDeliveryMode)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Profile() when $default != null:
-return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt);case _:
+return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt,_that.notifGameReminders,_that.notifWaitlistPromotions,_that.notifPaymentDues,_that.notifMatchdayLineups,_that.notifDeliveryMode);case _:
   return orElse();
 
 }
@@ -180,10 +185,10 @@ return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'notif_game_reminders')  bool notifGameReminders, @JsonKey(name: 'notif_waitlist_promotions')  bool notifWaitlistPromotions, @JsonKey(name: 'notif_payment_dues')  bool notifPaymentDues, @JsonKey(name: 'notif_matchday_lineups')  bool notifMatchdayLineups, @JsonKey(name: 'notif_delivery_mode')  String notifDeliveryMode)  $default,) {final _that = this;
 switch (_that) {
 case _Profile():
-return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt);case _:
+return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt,_that.notifGameReminders,_that.notifWaitlistPromotions,_that.notifPaymentDues,_that.notifMatchdayLineups,_that.notifDeliveryMode);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +205,10 @@ return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String displayName,  String? phone,  String emoji, @JsonKey(name: 'upi_id')  String? upiId, @JsonKey(name: 'is_profile_complete')  bool isProfileComplete, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'notif_game_reminders')  bool notifGameReminders, @JsonKey(name: 'notif_waitlist_promotions')  bool notifWaitlistPromotions, @JsonKey(name: 'notif_payment_dues')  bool notifPaymentDues, @JsonKey(name: 'notif_matchday_lineups')  bool notifMatchdayLineups, @JsonKey(name: 'notif_delivery_mode')  String notifDeliveryMode)?  $default,) {final _that = this;
 switch (_that) {
 case _Profile() when $default != null:
-return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt);case _:
+return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_that.isProfileComplete,_that.createdAt,_that.notifGameReminders,_that.notifWaitlistPromotions,_that.notifPaymentDues,_that.notifMatchdayLineups,_that.notifDeliveryMode);case _:
   return null;
 
 }
@@ -215,7 +220,7 @@ return $default(_that.id,_that.displayName,_that.phone,_that.emoji,_that.upiId,_
 @JsonSerializable()
 
 class _Profile implements Profile {
-  const _Profile({required this.id, @JsonKey(name: 'display_name') required this.displayName, this.phone, required this.emoji, @JsonKey(name: 'upi_id') this.upiId, @JsonKey(name: 'is_profile_complete') required this.isProfileComplete, @JsonKey(name: 'created_at') required this.createdAt});
+  const _Profile({required this.id, @JsonKey(name: 'display_name') required this.displayName, this.phone, required this.emoji, @JsonKey(name: 'upi_id') this.upiId, @JsonKey(name: 'is_profile_complete') required this.isProfileComplete, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'notif_game_reminders') this.notifGameReminders = true, @JsonKey(name: 'notif_waitlist_promotions') this.notifWaitlistPromotions = true, @JsonKey(name: 'notif_payment_dues') this.notifPaymentDues = true, @JsonKey(name: 'notif_matchday_lineups') this.notifMatchdayLineups = true, @JsonKey(name: 'notif_delivery_mode') this.notifDeliveryMode = 'immediate'});
   factory _Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
 @override final  String id;
@@ -225,6 +230,11 @@ class _Profile implements Profile {
 @override@JsonKey(name: 'upi_id') final  String? upiId;
 @override@JsonKey(name: 'is_profile_complete') final  bool isProfileComplete;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
+@override@JsonKey(name: 'notif_game_reminders') final  bool notifGameReminders;
+@override@JsonKey(name: 'notif_waitlist_promotions') final  bool notifWaitlistPromotions;
+@override@JsonKey(name: 'notif_payment_dues') final  bool notifPaymentDues;
+@override@JsonKey(name: 'notif_matchday_lineups') final  bool notifMatchdayLineups;
+@override@JsonKey(name: 'notif_delivery_mode') final  String notifDeliveryMode;
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.upiId, upiId) || other.upiId == upiId)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.upiId, upiId) || other.upiId == upiId)&&(identical(other.isProfileComplete, isProfileComplete) || other.isProfileComplete == isProfileComplete)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notifGameReminders, notifGameReminders) || other.notifGameReminders == notifGameReminders)&&(identical(other.notifWaitlistPromotions, notifWaitlistPromotions) || other.notifWaitlistPromotions == notifWaitlistPromotions)&&(identical(other.notifPaymentDues, notifPaymentDues) || other.notifPaymentDues == notifPaymentDues)&&(identical(other.notifMatchdayLineups, notifMatchdayLineups) || other.notifMatchdayLineups == notifMatchdayLineups)&&(identical(other.notifDeliveryMode, notifDeliveryMode) || other.notifDeliveryMode == notifDeliveryMode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,phone,emoji,upiId,isProfileComplete,createdAt);
+int get hashCode => Object.hash(runtimeType,id,displayName,phone,emoji,upiId,isProfileComplete,createdAt,notifGameReminders,notifWaitlistPromotions,notifPaymentDues,notifMatchdayLineups,notifDeliveryMode);
 
 @override
 String toString() {
-  return 'Profile(id: $id, displayName: $displayName, phone: $phone, emoji: $emoji, upiId: $upiId, isProfileComplete: $isProfileComplete, createdAt: $createdAt)';
+  return 'Profile(id: $id, displayName: $displayName, phone: $phone, emoji: $emoji, upiId: $upiId, isProfileComplete: $isProfileComplete, createdAt: $createdAt, notifGameReminders: $notifGameReminders, notifWaitlistPromotions: $notifWaitlistPromotions, notifPaymentDues: $notifPaymentDues, notifMatchdayLineups: $notifMatchdayLineups, notifDeliveryMode: $notifDeliveryMode)';
 }
 
 
@@ -259,7 +269,7 @@ abstract mixin class _$ProfileCopyWith<$Res> implements $ProfileCopyWith<$Res> {
   factory _$ProfileCopyWith(_Profile value, $Res Function(_Profile) _then) = __$ProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String displayName, String? phone, String emoji,@JsonKey(name: 'upi_id') String? upiId,@JsonKey(name: 'is_profile_complete') bool isProfileComplete,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'display_name') String displayName, String? phone, String emoji,@JsonKey(name: 'upi_id') String? upiId,@JsonKey(name: 'is_profile_complete') bool isProfileComplete,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'notif_game_reminders') bool notifGameReminders,@JsonKey(name: 'notif_waitlist_promotions') bool notifWaitlistPromotions,@JsonKey(name: 'notif_payment_dues') bool notifPaymentDues,@JsonKey(name: 'notif_matchday_lineups') bool notifMatchdayLineups,@JsonKey(name: 'notif_delivery_mode') String notifDeliveryMode
 });
 
 
@@ -276,7 +286,7 @@ class __$ProfileCopyWithImpl<$Res>
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = null,Object? phone = freezed,Object? emoji = null,Object? upiId = freezed,Object? isProfileComplete = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = null,Object? phone = freezed,Object? emoji = null,Object? upiId = freezed,Object? isProfileComplete = null,Object? createdAt = null,Object? notifGameReminders = null,Object? notifWaitlistPromotions = null,Object? notifPaymentDues = null,Object? notifMatchdayLineups = null,Object? notifDeliveryMode = null,}) {
   return _then(_Profile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -285,7 +295,12 @@ as String?,emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_t
 as String,upiId: freezed == upiId ? _self.upiId : upiId // ignore: cast_nullable_to_non_nullable
 as String?,isProfileComplete: null == isProfileComplete ? _self.isProfileComplete : isProfileComplete // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,notifGameReminders: null == notifGameReminders ? _self.notifGameReminders : notifGameReminders // ignore: cast_nullable_to_non_nullable
+as bool,notifWaitlistPromotions: null == notifWaitlistPromotions ? _self.notifWaitlistPromotions : notifWaitlistPromotions // ignore: cast_nullable_to_non_nullable
+as bool,notifPaymentDues: null == notifPaymentDues ? _self.notifPaymentDues : notifPaymentDues // ignore: cast_nullable_to_non_nullable
+as bool,notifMatchdayLineups: null == notifMatchdayLineups ? _self.notifMatchdayLineups : notifMatchdayLineups // ignore: cast_nullable_to_non_nullable
+as bool,notifDeliveryMode: null == notifDeliveryMode ? _self.notifDeliveryMode : notifDeliveryMode // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

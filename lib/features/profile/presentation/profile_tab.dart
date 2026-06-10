@@ -9,9 +9,12 @@ import 'package:gameior/shared/widgets/app_error_state.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/auth/data/auth_repository.dart';
 import 'package:gameior/shared/widgets/app_dialog.dart';
+import 'package:gameior/features/profile/application/signup_provider.dart';
 
 class Routes {
-  static const profileEdit = '/profile/edit';
+  static const profileEdit = '/home/profile/edit';
+  static const profileNotifications = '/home/profile/notifications';
+  static const profileDeleteAccount = '/home/profile/delete-account';
 }
 
 class ProfileTab extends ConsumerWidget {
@@ -63,12 +66,27 @@ class ProfileTab extends ConsumerWidget {
               ),
               const Divider(),
               ListTile(
+                title: const Text('Notifications'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(Routes.profileNotifications),
+              ),
+              const Divider(),
+              ListTile(
                 title: Text(
                   'Logout',
                   style: AppTextStyles.bodyLarge
                       .copyWith(color: AppColors.destructive),
                 ),
                 onTap: () => _confirmLogout(context, ref),
+              ),
+              const Divider(),
+              ListTile(
+                title: Text(
+                  'Delete Account',
+                  style: AppTextStyles.bodyLarge
+                      .copyWith(color: AppColors.destructive),
+                ),
+                onTap: () => context.push(Routes.profileDeleteAccount),
               ),
             ],
           );
