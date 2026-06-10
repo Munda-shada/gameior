@@ -24,7 +24,7 @@ class ProfileRepository {
   Future<void> saveProfile({
     required String userId,
     required String displayName,
-    required String phone,
+    required String? phone,
     required String emoji,
   }) async {
     await _client.from('profiles').upsert({
@@ -35,5 +35,23 @@ class ProfileRepository {
       'is_profile_complete': true,
       'updated_at':          DateTime.now().toIso8601String(),
     });
+  }
+
+  Future<void> updateNotificationPreferences({
+    required String userId,
+    required bool notifGameReminders,
+    required bool notifWaitlistPromotions,
+    required bool notifPaymentDues,
+    required bool notifMatchdayLineups,
+    required String notifDeliveryMode,
+  }) async {
+    await _client.from('profiles').update({
+      'notif_game_reminders': notifGameReminders,
+      'notif_waitlist_promotions': notifWaitlistPromotions,
+      'notif_payment_dues': notifPaymentDues,
+      'notif_matchday_lineups': notifMatchdayLineups,
+      'notif_delivery_mode': notifDeliveryMode,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', userId);
   }
 }

@@ -65,8 +65,11 @@ class CreateGroupNotifier extends _$CreateGroupNotifier {
       final groupId = await ref
           .read(groupsRepositoryProvider)
           .createGroup(state);
+      state = state.copyWith(isSubmitting: false);
       return groupId;
-    } catch (e) {
+    } catch (e,stackTrace) {
+      print('Error creating group: $e');
+      print(stackTrace);
       state = state.copyWith(isSubmitting: false,
           error: 'Failed to create group. Try again.');
       return null;

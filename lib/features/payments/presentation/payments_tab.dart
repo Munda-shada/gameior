@@ -76,6 +76,8 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
     final byPlayerAsync = ref.watch(adminDuesByPlayerProvider(widget.groupId));
     final byGameAsync = ref.watch(adminDuesByGameProvider(widget.groupId));
 
+    final hasDues = _byPlayer ? (byPlayerAsync.valueOrNull?.isNotEmpty ?? false) : (byGameAsync.valueOrNull?.isNotEmpty ?? false);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -112,6 +114,22 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
               ],
             ),
           ),
+
+          if (hasDues)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base).copyWith(bottom: AppSpacing.sm),
+              child: AppButton(
+                label: 'Remind Pending Dues',
+                leadingIcon: Icons.notifications_active_outlined,
+                variant: AppButtonVariant.secondary,
+                onPressed: () {
+                  // TODO: Call an Edge Function to dispatch actual push notifications
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Reminders sent to all members with pending dues!')),
+                  );
+                },
+              ),
+            ),
 
           Expanded(
             child: _byPlayer

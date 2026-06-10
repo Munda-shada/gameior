@@ -1,76 +1,86 @@
 import 'package:json_annotation/json_annotation.dart';
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum SportType {
-  @JsonValue('badminton') badminton,
-  @JsonValue('football') football,
-  @JsonValue('cricket') cricket,
-  @JsonValue('basketball') basketball,
-  @JsonValue('tennis') tennis,
-  @JsonValue('volleyball') volleyball,
-  @JsonValue('pickleball') pickleball,
-  @JsonValue('other') other,
+  badminton,
+  football,
+  cricket,
+  basketball,
+  tennis,
+  volleyball,
+  pickleball,
+  other,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum MemberRole {
-  @JsonValue('host') host,
-  @JsonValue('co_host') coHost,
-  @JsonValue('player') player,
+  host,
+  coHost,
+  player,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum MembershipStatus {
-  @JsonValue('pending_approval') pendingApproval,
-  @JsonValue('active') active,
-  @JsonValue('removed') removed,
-  @JsonValue('left') left,
+  pendingApproval,
+  active,
+  removed,
+  left,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum RsvpStatus {
-  @JsonValue('unanswered') unanswered,
-  @JsonValue('yes') yes,
-  @JsonValue('no') no,
-  @JsonValue('maybe') maybe,
-  @JsonValue('guest') guest,
-  @JsonValue('waitlist') waitlist,
+  unanswered,
+  yes,
+  no,
+  maybe,
+  guest,
+  waitlist,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum PaymentModel {
-  @JsonValue('prepaid') prepaid,
-  @JsonValue('postpaid') postpaid,
+  prepaid,
+  postpaid,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum GameStatus {
-  @JsonValue('upcoming') upcoming,
-  @JsonValue('completed') completed,
-  @JsonValue('cancelled') cancelled,
+  upcoming,
+  completed,
+  cancelled,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum DueStatus {
-  @JsonValue('unpaid') unpaid,
-  @JsonValue('pending_verification') pendingVerification,
-  @JsonValue('paid') paid,
-  @JsonValue('rejected') rejected,
+  unpaid,
+  pendingVerification,
+  paid,
+  rejected,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum SkillLevel {
-  @JsonValue('all') all,
-  @JsonValue('beginner') beginner,
-  @JsonValue('intermediate') intermediate,
-  @JsonValue('advanced') advanced,
+  all,
+  beginner,
+  intermediate,
+  advanced,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum NotificationDelivery {
-  @JsonValue('immediate') immediate,
-  @JsonValue('daily_digest') dailyDigest,
-  @JsonValue('quiet_hours') quietHours,
+  immediate,
+  dailyDigest,
+  quietHours,
 }
 
+@JsonEnum(fieldRename: FieldRename.snake)
 enum AuditAction {
-  @JsonValue('member_joined') memberJoined,
-  @JsonValue('member_left') memberLeft,
-  @JsonValue('member_removed') memberRemoved,
-  @JsonValue('role_promoted') rolePromoted,
-  @JsonValue('role_demoted') roleDemoted,
-  @JsonValue('ownership_transferred') ownershipTransferred,
-  @JsonValue('join_request_accepted') joinRequestAccepted,
-  @JsonValue('join_request_rejected') joinRequestRejected,
+  memberJoined,
+  memberLeft,
+  memberRemoved,
+  rolePromoted,
+  roleDemoted,
+  ownershipTransferred,
+  joinRequestAccepted,
+  joinRequestRejected,
 }

@@ -20,7 +20,8 @@ import 'package:gameior/shared/widgets/section_header.dart';
 class CreateGameScreen extends ConsumerStatefulWidget {
   final String groupId;
   final String? editGameId;
-  const CreateGameScreen({required this.groupId, this.editGameId, super.key});
+  final bool isTemplate;
+  const CreateGameScreen({required this.groupId, this.editGameId, this.isTemplate = false, super.key});
 
   @override
   ConsumerState<CreateGameScreen> createState() => _CreateGameScreenState();
@@ -78,7 +79,6 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
 
   Future<void> _loadInitialData() async {
     final client = ref.read(supabaseClientProvider);
-    final isTemplate = GoRouterState.of(context).uri.queryParameters['template'] == 'true';
 
     try {
       // 1. Fetch group settings to pre-populate defaults
@@ -151,7 +151,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
         }
       } 
       // 4. Template Mode Pre-fill
-      else if (isTemplate) {
+      else if (widget.isTemplate) {
         final lastGame = await client
             .from('games')
             .select('*, game_cost_items(*)')

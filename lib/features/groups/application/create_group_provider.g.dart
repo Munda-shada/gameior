@@ -7,7 +7,7 @@ part of 'create_group_provider.dart';
 // **************************************************************************
 
 String _$createGroupNotifierHash() =>
-    r'57d63aec40437a7a366a420795f43affee3325bd';
+    r'bfabb583377afa2ecc192cfdb0bc88302bca3643';
 
 /// See also [CreateGroupNotifier].
 @ProviderFor(CreateGroupNotifier)

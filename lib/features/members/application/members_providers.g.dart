@@ -6,7 +6,7 @@ part of 'members_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$groupMembersHash() => r'54275bb2b78a48c02ceeb13da52f8d25b2c3f938';
+String _$memberStatsHash() => r'c36745a5f056b0a4dbf530dd1c0db556fa0b2dc6';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,6 +28,141 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
+
+/// See also [memberStats].
+@ProviderFor(memberStats)
+const memberStatsProvider = MemberStatsFamily();
+
+/// See also [memberStats].
+class MemberStatsFamily extends Family<AsyncValue<MemberStats>> {
+  /// See also [memberStats].
+  const MemberStatsFamily();
+
+  /// See also [memberStats].
+  MemberStatsProvider call({required String groupId, required String userId}) {
+    return MemberStatsProvider(groupId: groupId, userId: userId);
+  }
+
+  @override
+  MemberStatsProvider getProviderOverride(
+    covariant MemberStatsProvider provider,
+  ) {
+    return call(groupId: provider.groupId, userId: provider.userId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'memberStatsProvider';
+}
+
+/// See also [memberStats].
+class MemberStatsProvider extends AutoDisposeFutureProvider<MemberStats> {
+  /// See also [memberStats].
+  MemberStatsProvider({required String groupId, required String userId})
+    : this._internal(
+        (ref) => memberStats(
+          ref as MemberStatsRef,
+          groupId: groupId,
+          userId: userId,
+        ),
+        from: memberStatsProvider,
+        name: r'memberStatsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$memberStatsHash,
+        dependencies: MemberStatsFamily._dependencies,
+        allTransitiveDependencies: MemberStatsFamily._allTransitiveDependencies,
+        groupId: groupId,
+        userId: userId,
+      );
+
+  MemberStatsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupId,
+    required this.userId,
+  }) : super.internal();
+
+  final String groupId;
+  final String userId;
+
+  @override
+  Override overrideWith(
+    FutureOr<MemberStats> Function(MemberStatsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: MemberStatsProvider._internal(
+        (ref) => create(ref as MemberStatsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupId: groupId,
+        userId: userId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<MemberStats> createElement() {
+    return _MemberStatsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MemberStatsProvider &&
+        other.groupId == groupId &&
+        other.userId == userId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupId.hashCode);
+    hash = _SystemHash.combine(hash, userId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin MemberStatsRef on AutoDisposeFutureProviderRef<MemberStats> {
+  /// The parameter `groupId` of this provider.
+  String get groupId;
+
+  /// The parameter `userId` of this provider.
+  String get userId;
+}
+
+class _MemberStatsProviderElement
+    extends AutoDisposeFutureProviderElement<MemberStats>
+    with MemberStatsRef {
+  _MemberStatsProviderElement(super.provider);
+
+  @override
+  String get groupId => (origin as MemberStatsProvider).groupId;
+  @override
+  String get userId => (origin as MemberStatsProvider).userId;
+}
+
+String _$groupMembersHash() => r'54275bb2b78a48c02ceeb13da52f8d25b2c3f938';
 
 abstract class _$GroupMembers
     extends BuildlessAutoDisposeAsyncNotifier<List<GroupMember>> {

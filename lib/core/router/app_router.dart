@@ -40,32 +40,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     refreshListenable: routerNotifier,
     redirect: (context, state) {
-      final authState = ref.read(authStateProvider);
-      final profileState = ref.read(currentUserProvider);
-      
-      final isAuthenticated = authState.valueOrNull?.session != null;
-      
-      if (isAuthenticated && profileState.isLoading && profileState.valueOrNull == null) {
-        return null;
-      }
-      
-      final isProfileComplete = profileState.valueOrNull?.isProfileComplete ?? false;
+  final authState = ref.read(authStateProvider);
+  final profileState = ref.read(currentUserProvider);
+  
+  final isAuthenticated = authState.valueOrNull?.session != null;
+  final isLoading = profileState.isLoading && profileState.valueOrNull == null;
+  final isProfileComplete = profileState.valueOrNull?.isProfileComplete ?? false;
 
-      final onAuthPage = state.matchedLocation == '/login' 
-                      || state.matchedLocation == '/signup';
+  final location = state.matchedLocation;
+  final onAuthPages = location == '/login' 
+                   || location == '/signup' 
+                   || location == '/splash';
 
-      if (!isAuthenticated && !onAuthPage) {
-        return '/login';
-      }
-      if (isAuthenticated && !isProfileComplete && 
-          state.matchedLocation != '/signup') {
-        return '/signup';
-      }
-      if (isAuthenticated && isProfileComplete && onAuthPage) {
-        return '/home';
-      }
-      return null;
-    },
+  // Still loading profile — don't interrupt the user's flow
+  if (isAuthenticated && isLoading) {
+    if (onAuthPages) return '/splash';
+    return null;
+  }
+
+  // Not logged in → go to login
+  if (!isAuthenticated && !onAuthPages) return '/login';
+  if (!isAuthenticated) return null;
+
+  // Logged in but profile incomplete → go to signup
+  if (!isProfileComplete && location != '/signup') return '/signup';
+
+  // Logged in, profile complete, on an auth page → go to app
+  if (isProfileComplete && onAuthPages) return '/home/feed';
+
+  return null;
+},
     routes: [
   GoRoute(path: '/splash',  builder: (context, state) => const SplashScreen()),
   GoRoute(path: '/login',   builder: (context, state) => const LoginScreen()),
@@ -105,7 +109,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   GoRoute(
     path: '/group/:groupId',
-    builder: (_, state) => GroupShell(groupId: state.pathParameters['groupId']!),
+    builder: (context, state) {
+      final tabStr = state.uri.queryParameters['tab'];
+      final initialTab = tabStr != null ? int.tryParse(tabStr) : null;
+      final extraTab = (state.extra as Map<String, dynamic>?)?['initialTab'] as int?;
+      return GroupShell(
+        groupId: state.pathParameters['groupId']!,
+        initialTab: initialTab ?? extraTab,
+      );
+    },
     routes: [
       GoRoute(
         path: 'game/:gameId',
@@ -135,6 +147,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (ctx, state) => CreateGameScreen(
           groupId:    state.pathParameters['groupId']!,
           editGameId: state.uri.queryParameters['edit'],  // null = new game
+          isTemplate: state.uri.queryParameters['template'] == 'true',
         ),
       ),
     ],
