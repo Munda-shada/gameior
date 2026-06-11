@@ -1,8 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/features/payments/application/payments_providers.dart';
@@ -33,9 +32,11 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
   String _searchQuery = '';
   String _sortBy = 'role'; // 'role' | 'name' | 'dues'
   final _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -45,6 +46,7 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
     final hasDuesAsync = ref.watch(groupHasUnpaidDuesProvider(widget.groupId));
     final duesAsync = ref.watch(adminDuesByPlayerProvider(widget.groupId));
+    final theme = Theme.of(context);
 
     return membersAsync.when(
       loading: () => const SingleChildScrollView(
@@ -114,14 +116,15 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
             padding: const EdgeInsets.all(AppSpacing.base),
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              // Search Bar
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Search roster...',
-                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainer,
+                    prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
@@ -132,13 +135,23 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
                           )
                         : null,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
-                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                   ),
                   onChanged: (val) {
-                    setState(() => _searchQuery = val.trim());
+                    _debounceTimer?.cancel();
+                    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                      setState(() => _searchQuery = val.trim());
+                    });
                   },
                 ),
               ),
@@ -146,38 +159,45 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
               // Sort Chips
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.base),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      const Text('Sort by: ', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      const SizedBox(width: AppSpacing.xs),
-                      ChoiceChip(
-                        label: const Text('Role'),
-                        selected: _sortBy == 'role',
-                        onSelected: (selected) {
-                          if (selected) setState(() => _sortBy = 'role');
-                        },
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      ChoiceChip(
-                        label: const Text('Name'),
-                        selected: _sortBy == 'name',
-                        onSelected: (selected) {
-                          if (selected) setState(() => _sortBy = 'name');
-                        },
-                      ),
-                      if (isAdmin) ...[
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text('Sort by: ', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                         const SizedBox(width: AppSpacing.xs),
                         ChoiceChip(
-                          label: const Text('Dues'),
-                          selected: _sortBy == 'dues',
+                          label: const Text('Role'),
+                          selected: _sortBy == 'role',
                           onSelected: (selected) {
-                            if (selected) setState(() => _sortBy = 'dues');
+                            if (selected) setState(() => _sortBy = 'role');
                           },
                         ),
+                        const SizedBox(width: AppSpacing.xs),
+                        ChoiceChip(
+                          label: const Text('Name'),
+                          selected: _sortBy == 'name',
+                          onSelected: (selected) {
+                            if (selected) setState(() => _sortBy = 'name');
+                          },
+                        ),
+                        if (isAdmin) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          ChoiceChip(
+                            label: const Text('Dues'),
+                            selected: _sortBy == 'dues',
+                            onSelected: (selected) {
+                              if (selected) setState(() => _sortBy = 'dues');
+                            },
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -198,11 +218,11 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
                               await ref
                                   .read(adminDuesNotifierProvider(widget.groupId).notifier)
                                   .triggerReminders();
-                              if (mounted) {
+                              if (context.mounted) {
                                 showToast(context, 'Reminders sent to all members with pending dues!');
                               }
                             } catch (e) {
-                              if (mounted) {
+                              if (context.mounted) {
                                 showToast(context, 'Failed to send reminders: $e', isError: true);
                               }
                             } finally {
@@ -214,7 +234,9 @@ class _MembersRosterViewState extends ConsumerState<MembersRosterView> {
                   ),
                 ),
 
-              if (_sortBy == 'role') ...[
+              if (filteredMembers.isEmpty && _searchQuery.isNotEmpty)
+                AppEmptyState(message: 'No members match "$_searchQuery"')
+              else if (_sortBy == 'role') ...[
                 if (hosts.isNotEmpty) ...[
                   const _RosterSectionHeader(title: 'HOST'),
                   ...hosts.map((m) => MemberRow(groupId: widget.groupId, member: m, currentRole: widget.currentRole)),
@@ -247,12 +269,13 @@ class _RosterSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm, left: AppSpacing.xs),
       child: Text(
         title,
-        style: AppTextStyles.labelSmall.copyWith(
-          color: AppColors.textSecondary,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
           letterSpacing: 1.2,
           fontWeight: FontWeight.bold,
         ),

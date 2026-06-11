@@ -20,7 +20,7 @@ class FeedDuesSection extends ConsumerWidget {
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
         child: AppLoadingShimmer(type: ShimmerType.paymentRow),
       ),
-      error: (e, __) => Padding(
+      error: (e, stack) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
         child: AppErrorState(
           message: 'Failed to load dues',

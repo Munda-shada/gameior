@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_loading_shimmer.dart';
@@ -15,13 +14,14 @@ class GroupSettingsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final contextAsync = ref.watch(groupContextProvider(groupId));
 
     return contextAsync.when(
       loading: () => const Scaffold(body: AppLoadingShimmer(type: ShimmerType.card)),
       error: (e, _) => Scaffold(
         body: Center(
-          child: Text('Failed to load settings', style: AppTextStyles.bodyMedium),
+          child: Text('Failed to load settings', style: theme.textTheme.bodyMedium),
         ),
       ),
       data: (groupContext) {

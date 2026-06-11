@@ -3,9 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/payments/application/feed_dues_provider.dart';
 import 'package:gameior/features/payments/data/payments_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -24,6 +22,7 @@ class FeedDuesSheet extends ConsumerStatefulWidget {
 class _FeedDuesSheetState extends ConsumerState<FeedDuesSheet> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.base,
@@ -37,7 +36,9 @@ class _FeedDuesSheetState extends ConsumerState<FeedDuesSheet> {
         children: [
           Text(
             'Pay dues across ${widget.summary.groupCount} group${widget.summary.groupCount > 1 ? 's' : ''}',
-            style: AppTextStyles.bodySmall,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.base),
           ...widget.summary.groupBreakdown.map(
@@ -148,15 +149,16 @@ class _GroupDuesCardState extends ConsumerState<GroupDuesCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rupees = (widget.breakdown.pendingPaise / 100.0).toStringAsFixed(0);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.base),
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       ),
       child: Form(
         key: _formKey,
@@ -170,28 +172,33 @@ class _GroupDuesCardState extends ConsumerState<GroupDuesCard> {
                 Expanded(
                   child: Text(
                     widget.breakdown.groupName,
-                    style: AppTextStyles.headlineSmall,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   '₹$rupees',
-                  style: AppTextStyles.headlineLarge.copyWith(
-                    color: AppColors.destructive,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
             Text(
               '${widget.breakdown.unpaidCount} unpaid game${widget.breakdown.unpaidCount > 1 ? 's' : ''}',
-              style: AppTextStyles.caption,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-            const Divider(height: AppSpacing.lg),
+            Divider(height: AppSpacing.lg, color: theme.colorScheme.outline.withValues(alpha: 0.3)),
             if (widget.breakdown.unpaidCount > 1) ...[
               Text(
                 'You have multiple outstanding dues in this group. Please visit the Payments tab to pay them individually.',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: AppSpacing.base),
               AppButton(
@@ -209,13 +216,13 @@ class _GroupDuesCardState extends ConsumerState<GroupDuesCard> {
                     Expanded(
                       child: Text(
                         _upiId,
-                        style: AppTextStyles.bodySmall.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.copy, size: 16, color: AppColors.textSecondary),
+                      icon: Icon(Icons.copy, size: 16, color: theme.colorScheme.onSurfaceVariant),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: _upiId));
                         showToast(context, 'UPI ID copied');

@@ -1,173 +1,89 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
-import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/features/profile/data/profile_repository.dart';
-import 'package:gameior/features/profile/application/signup_provider.dart';
-import 'package:gameior/core/utils/app_toast.dart';
+import 'package:gameior/features/profile/application/notification_preferences_provider.dart';
 
-class NotificationPreferencesScreen extends ConsumerStatefulWidget {
+class NotificationPreferencesScreen extends ConsumerWidget {
   const NotificationPreferencesScreen({super.key});
 
   @override
-  ConsumerState<NotificationPreferencesScreen> createState() => _NotificationPreferencesScreenState();
-}
-
-class _NotificationPreferencesScreenState extends ConsumerState<NotificationPreferencesScreen> {
-  bool _isInitialized = false;
-  late bool _gameReminders;
-  late bool _waitlistPromotions;
-  late bool _paymentDues;
-  late bool _matchdayLineups;
-  late String _deliveryTiming;
-
-  Timer? _debounceTimer;
-  bool _isSaving = false;
-
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
-  }
-
-  void _onPreferenceChanged() {
-    setState(() => _isSaving = true);
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      final client = ref.read(supabaseClientProvider);
-      final user = client.auth.currentUser;
-      if (user == null) {
-        if (mounted) setState(() => _isSaving = false);
-        return;
-      }
-
-      try {
-        await ref.read(profileRepositoryProvider).updateNotificationPreferences(
-              userId: user.id,
-              notifGameReminders: _gameReminders,
-              notifWaitlistPromotions: _waitlistPromotions,
-              notifPaymentDues: _paymentDues,
-              notifMatchdayLineups: _matchdayLineups,
-              notifDeliveryMode: _deliveryTiming,
-            );
-        ref.invalidate(currentUserProvider);
-        if (mounted) {
-          setState(() => _isSaving = false);
-          showToast(context, 'Preferences saved');
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isSaving = false);
-          showToast(context, 'Failed to save preferences: $e', isError: true);
-        }
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final profileAsync = ref.watch(currentUserProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final prefsAsync = ref.watch(notificationPreferencesNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
-          if (_isSaving)
-            const Center(
+          if (prefsAsync.isLoading)
+            Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.base),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
                 child: SizedBox(
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
                   ),
                 ),
               ),
             )
           else
-            const Icon(Icons.check, color: Colors.green),
+            Icon(Icons.check, color: theme.colorScheme.primary),
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      body: profileAsync.when(
+      body: prefsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error loading preferences: $err')),
-        data: (profile) {
-          if (profile == null) {
-            return const Center(child: Text('No profile found'));
-          }
-
-          if (!_isInitialized) {
-            _gameReminders = profile.notifGameReminders;
-            _waitlistPromotions = profile.notifWaitlistPromotions;
-            _paymentDues = profile.notifPaymentDues;
-            _matchdayLineups = profile.notifMatchdayLineups;
-            _deliveryTiming = profile.notifDeliveryMode;
-            _isInitialized = true;
-          }
-
+        data: (prefs) {
+          final notifier = ref.read(notificationPreferencesNotifierProvider.notifier);
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             children: [
-              _buildSectionHeader('PUSH NOTIFICATIONS'),
+              _buildSectionHeader(context, 'PUSH NOTIFICATIONS'),
               SwitchListTile(
                 title: const Text('Game Reminders'),
                 subtitle: const Text('Get notified before a game starts'),
-                value: _gameReminders,
-                activeColor: AppColors.primary,
-                onChanged: (val) {
-                  setState(() => _gameReminders = val);
-                  _onPreferenceChanged();
-                },
+                value: prefs.gameReminders,
+                activeThumbColor: theme.colorScheme.primary,
+                onChanged: notifier.toggleGameReminders,
               ),
               SwitchListTile(
                 title: const Text('Waitlist Promotions'),
                 subtitle: const Text('Alerts when you get bumped off the waitlist'),
-                value: _waitlistPromotions,
-                activeColor: AppColors.primary,
-                onChanged: (val) {
-                  setState(() => _waitlistPromotions = val);
-                  _onPreferenceChanged();
-                },
+                value: prefs.waitlistPromotions,
+                activeThumbColor: theme.colorScheme.primary,
+                onChanged: notifier.toggleWaitlistPromotions,
               ),
               SwitchListTile(
                 title: const Text('Payment Dues'),
                 subtitle: const Text('Reminders for unpaid game sessions'),
-                value: _paymentDues,
-                activeColor: AppColors.primary,
-                onChanged: (val) {
-                  setState(() => _paymentDues = val);
-                  _onPreferenceChanged();
-                },
+                value: prefs.paymentDues,
+                activeThumbColor: theme.colorScheme.primary,
+                onChanged: notifier.togglePaymentDues,
               ),
               SwitchListTile(
                 title: const Text('Matchday Lineups'),
                 subtitle: const Text('Notifications when the final roster is locked'),
-                value: _matchdayLineups,
-                activeColor: AppColors.primary,
-                onChanged: (val) {
-                  setState(() => _matchdayLineups = val);
-                  _onPreferenceChanged();
-                },
+                value: prefs.matchdayLineups,
+                activeThumbColor: theme.colorScheme.primary,
+                onChanged: notifier.toggleMatchdayLineups,
               ),
 
               const Divider(height: AppSpacing.xxl),
 
-              _buildSectionHeader('DELIVERY TIMING'),
-              const Padding(
-                padding: EdgeInsets.symmetric(
+              _buildSectionHeader(context, 'DELIVERY TIMING'),
+              Padding(
+                padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.base,
                   vertical: AppSpacing.xs,
                 ),
                 child: Text(
                   'Choose how you want to receive less urgent notifications like group announcements or weekly roundups.',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -175,37 +91,22 @@ class _NotificationPreferencesScreenState extends ConsumerState<NotificationPref
                 title: 'Immediate',
                 subtitle: 'Send notifications as soon as they happen',
                 value: 'immediate',
-                groupValue: _deliveryTiming,
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _deliveryTiming = val);
-                    _onPreferenceChanged();
-                  }
-                },
+                groupValue: prefs.deliveryMode,
+                onChanged: notifier.setDeliveryMode,
               ),
               _DeliveryOptionTile(
                 title: 'Daily Digest',
                 subtitle: 'Group everything into one notification per day',
                 value: 'daily_digest',
-                groupValue: _deliveryTiming,
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _deliveryTiming = val);
-                    _onPreferenceChanged();
-                  }
-                },
+                groupValue: prefs.deliveryMode,
+                onChanged: notifier.setDeliveryMode,
               ),
               _DeliveryOptionTile(
                 title: 'Quiet Hours',
                 subtitle: 'Pause non-urgent alerts between 10 PM and 8 AM',
                 value: 'quiet_hours',
-                groupValue: _deliveryTiming,
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _deliveryTiming = val);
-                    _onPreferenceChanged();
-                  }
-                },
+                groupValue: prefs.deliveryMode,
+                onChanged: notifier.setDeliveryMode,
               ),
             ],
           );
@@ -214,7 +115,7 @@ class _NotificationPreferencesScreenState extends ConsumerState<NotificationPref
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.base,
@@ -222,8 +123,8 @@ class _NotificationPreferencesScreenState extends ConsumerState<NotificationPref
       ),
       child: Text(
         title,
-        style: AppTextStyles.labelSmall.copyWith(
-          color: AppColors.textSecondary,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           letterSpacing: 1.2,
           fontWeight: FontWeight.bold,
         ),
@@ -250,14 +151,16 @@ class _DeliveryOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RadioListTile<String>(
-      title: Text(title, style: AppTextStyles.bodyLarge),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
       subtitle: Text(
         subtitle,
-        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
       value: value,
       groupValue: groupValue,
-      activeColor: AppColors.primary,
+      activeColor: Theme.of(context).colorScheme.primary,
       onChanged: onChanged,
       controlAffinity: ListTileControlAffinity.trailing,
     );

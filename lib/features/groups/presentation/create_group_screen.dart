@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/groups/application/create_group_provider.dart';
 import 'package:gameior/features/groups/application/groups_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -20,7 +18,7 @@ class CreateGroupScreen extends ConsumerStatefulWidget {
 
 class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _venueController;
@@ -59,11 +57,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final formState = ref.watch(createGroupNotifierProvider);
     final notifier = ref.read(createGroupNotifierProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         title: const Text('Create a Group'),
         leading: IconButton(
@@ -93,15 +92,15 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                   children: [
                     LinearProgressIndicator(
                       value: formState.currentStep / 4,
-                      backgroundColor: AppColors.border,
-                      color: AppColors.primary,
+                      backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primary,
                       minHeight: 6,
                       borderRadius: BorderRadius.circular(3),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Step ${formState.currentStep} of 4',
-                      style: AppTextStyles.labelMedium,
+                      style: theme.textTheme.labelMedium,
                     ),
                   ],
                 ),
@@ -115,14 +114,15 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                         padding: const EdgeInsets.all(AppSpacing.sm),
                         margin: const EdgeInsets.only(bottom: AppSpacing.base),
                         decoration: BoxDecoration(
-                          color: AppColors.destructiveMuted,
-                          border: Border.all(color: AppColors.destructive),
+                          color: theme.colorScheme.error.withValues(alpha: 0.1),
+                          border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.3)),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
                           formState.error!,
-                          style: AppTextStyles.bodyMedium
-                              .copyWith(color: AppColors.destructive),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
                         ),
                       ),
                     ],
@@ -133,9 +133,13 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
               // Bottom buttons
               Container(
                 padding: const EdgeInsets.all(AppSpacing.base),
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border(top: BorderSide(color: AppColors.border)),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -168,12 +172,19 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   }
 
   Widget _buildStepContent(CreateGroupFormState formState, CreateGroupNotifier notifier) {
+    final theme = Theme.of(context);
+
     switch (formState.currentStep) {
       case 1:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Group Details', style: AppTextStyles.displayMedium),
+            Text(
+              'Group Details',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               label: 'Group Name',
@@ -185,7 +196,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             ),
             const SizedBox(height: AppSpacing.base),
             DropdownButtonFormField<SportType>(
-              value: formState.sport,
+              initialValue: formState.sport,
               decoration: const InputDecoration(labelText: 'Sport'),
               items: SportType.values.map((sport) {
                 return DropdownMenuItem(
@@ -213,7 +224,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Venue', style: AppTextStyles.displayMedium),
+            Text(
+              'Venue',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               label: 'Default Venue',
@@ -237,7 +253,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Payment & Rules', style: AppTextStyles.displayMedium),
+            Text(
+              'Payment & Rules',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               label: 'Maximum Capacity per Game',
@@ -260,7 +281,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             ),
             const SizedBox(height: AppSpacing.base),
             DropdownButtonFormField<PaymentModel>(
-              value: formState.paymentModel,
+              initialValue: formState.paymentModel,
               decoration: const InputDecoration(labelText: 'Payment Model'),
               items: PaymentModel.values.map((model) {
                 return DropdownMenuItem(
@@ -314,13 +335,18 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Access Settings', style: AppTextStyles.displayMedium),
+            Text(
+              'Access Settings',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             SwitchListTile(
               title: const Text('Require approval to join'),
               subtitle: const Text('New members must request to join'),
               value: formState.requireApproval,
-              activeColor: AppColors.primary,
+              activeThumbColor: theme.colorScheme.primary,
               contentPadding: EdgeInsets.zero,
               onChanged: notifier.updateRequireApproval,
             ),
@@ -329,16 +355,16 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
               title: const Text('Allow members to invite'),
               subtitle: const Text('Players can view and share the invite code'),
               value: formState.allowMemberInvites,
-              activeColor: AppColors.primary,
+              activeThumbColor: theme.colorScheme.primary,
               contentPadding: EdgeInsets.zero,
               onChanged: notifier.updateAllowMemberInvites,
-            ),
+              ),
             const Divider(),
             SwitchListTile(
               title: const Text('Allow guests'),
               subtitle: const Text('Players can add guests (up to 5) when RSVPing'),
               value: formState.allowGuests,
-              activeColor: AppColors.primary,
+              activeThumbColor: theme.colorScheme.primary,
               contentPadding: EdgeInsets.zero,
               onChanged: notifier.updateAllowGuests,
             ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
 class PaymentDetailsSection extends StatelessWidget {
@@ -19,6 +17,8 @@ class PaymentDetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,20 +27,23 @@ class PaymentDetailsSection extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.base),
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
-              const Text(
+              Text(
                 'Scan or transfer to organizer\'s UPI ID below:',
-                style: AppTextStyles.bodyMedium,
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSpacing.sm),
               SelectableText(
                 upiId,
-                style: AppTextStyles.displayMedium.copyWith(color: AppColors.primary, fontSize: 22),
+                style: (theme.textTheme.displayMedium ?? const TextStyle()).copyWith(
+                  color: theme.colorScheme.primary,
+                  fontSize: 22,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -53,7 +56,7 @@ class PaymentDetailsSection extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.base),
                   IconButton(
-                    icon: const Icon(Icons.copy, color: AppColors.textSecondary),
+                    icon: Icon(Icons.copy, color: theme.colorScheme.onSurfaceVariant),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: upiId));
                       onCopied();

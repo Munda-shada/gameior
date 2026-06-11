@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
-
 class StatsOverviewRow extends StatelessWidget {
   final int gamesPlayed;
   final double attendancePct;
@@ -35,11 +32,12 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Text(value, style: AppTextStyles.displayMedium.copyWith(color: AppColors.primaryDark)),
+        Text(value, style: theme.textTheme.displayMedium?.copyWith(color: theme.colorScheme.primary)),
         const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.bodySmall),
+        Text(label, style: theme.textTheme.bodySmall),
       ],
     );
   }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 
 class HostedGroupsSection extends StatelessWidget {
@@ -20,23 +18,26 @@ class HostedGroupsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        const Icon(
+        Icon(
           Icons.warning_amber_rounded,
-          color: AppColors.waitlist,
+          color: colorScheme.tertiary,
           size: 48,
         ),
         const SizedBox(height: AppSpacing.md),
-        const Text(
+        Text(
           'Unresolved Groups',
-          style: AppTextStyles.headlineMedium,
+          style: textTheme.headlineMedium,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'You are currently hosting ${groups.length} group(s). Before you can delete your account, you must transfer ownership to a Co-Host or delete the groups.',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: AppSpacing.xl),
         ...groups.map((group) {
@@ -50,12 +51,12 @@ class HostedGroupsSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(group['name'], style: AppTextStyles.headlineSmall),
+                  Text(group['name'], style: textTheme.headlineSmall),
                   const SizedBox(height: AppSpacing.sm),
                   if (hasCoHosts) ...[
                     Text(
                       'Co-Hosts available: ${coHosts.length}',
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     SizedBox(
@@ -66,9 +67,9 @@ class HostedGroupsSection extends StatelessWidget {
                       ),
                     ),
                   ] else ...[
-                    const Text(
+                    Text(
                       'No Co-Hosts are in this group. You must promote a member to Co-Host or delete the group.',
-                      style: TextStyle(color: AppColors.waitlist, fontSize: 13),
+                      style: TextStyle(color: colorScheme.tertiary, fontSize: 13),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Row(

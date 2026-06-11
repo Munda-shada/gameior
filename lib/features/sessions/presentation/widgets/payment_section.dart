@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_text_field.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
@@ -37,6 +35,8 @@ class PaymentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -44,14 +44,14 @@ class PaymentSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Payment Model', style: AppTextStyles.headlineSmall),
+              Text('Payment Model', style: theme.textTheme.headlineSmall),
               const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
@@ -59,9 +59,11 @@ class PaymentSection extends StatelessWidget {
                     child: ChoiceChip(
                       label: const Center(child: Text('PRE-PAID')),
                       selected: paymentModel == PaymentModel.prepaid,
-                      selectedColor: AppColors.primary.withOpacity(0.15),
+                      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: paymentModel == PaymentModel.prepaid ? AppColors.primaryDark : AppColors.textSecondary,
+                        color: paymentModel == PaymentModel.prepaid
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.bold,
                       ),
                       onSelected: (selected) {
@@ -74,9 +76,11 @@ class PaymentSection extends StatelessWidget {
                     child: ChoiceChip(
                       label: const Center(child: Text('POST-PAID')),
                       selected: paymentModel == PaymentModel.postpaid,
-                      selectedColor: AppColors.primary.withOpacity(0.15),
+                      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: paymentModel == PaymentModel.postpaid ? AppColors.primaryDark : AppColors.textSecondary,
+                        color: paymentModel == PaymentModel.postpaid
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.bold,
                       ),
                       onSelected: (selected) {
@@ -89,7 +93,9 @@ class PaymentSection extends StatelessWidget {
               const SizedBox(height: AppSpacing.base),
               AppTextField(
                 controller: costController,
-                label: paymentModel == PaymentModel.prepaid ? 'Cost per person (₹)' : 'Estimated cost per person (₹) (Optional)',
+                label: paymentModel == PaymentModel.prepaid
+                    ? 'Cost per person (₹)'
+                    : 'Estimated cost per person (₹) (Optional)',
                 hint: '150',
                 enabled: !showCostBreakdown,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -108,12 +114,12 @@ class PaymentSection extends StatelessWidget {
                 validator: (v) => v == null || v.isEmpty ? 'UPI ID is required.' : null,
               ),
               const SizedBox(height: AppSpacing.sm),
-              
+
               // Cost Breakdown Accordion
               ExpansionTile(
-                leading: const Icon(Icons.calculate_outlined, color: AppColors.primary),
-                title: const Text('Add Cost Breakdown', style: AppTextStyles.headlineSmall),
-                subtitle: const Text('Sum elements to calculate per head cost', style: AppTextStyles.bodySmall),
+                leading: Icon(Icons.calculate_outlined, color: theme.colorScheme.primary),
+                title: Text('Add Cost Breakdown', style: theme.textTheme.headlineSmall),
+                subtitle: Text('Sum elements to calculate per head cost', style: theme.textTheme.bodySmall),
                 initiallyExpanded: showCostBreakdown,
                 onExpansionChanged: onCostBreakdownExpanded,
                 children: [

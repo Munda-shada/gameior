@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_text_field.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
@@ -26,14 +24,14 @@ class GameDetailsSection extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildSkillChip(String value, String label) {
+  Widget _buildSkillChip(ThemeData theme, String value, String label) {
     final isSelected = allowedSkillLevels.contains(value);
     return FilterChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.primary.withOpacity(0.15),
+      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
+        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       onSelected: (selected) => onSkillLevelSelected(value, selected),
@@ -42,6 +40,8 @@ class GameDetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,9 +49,9 @@ class GameDetailsSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -92,9 +92,9 @@ class GameDetailsSection extends StatelessWidget {
                 maxLines: 2,
               ),
               const SizedBox(height: AppSpacing.base),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Allowed Skill Levels', style: AppTextStyles.headlineSmall),
+                child: Text('Allowed Skill Levels', style: theme.textTheme.headlineSmall),
               ),
               const SizedBox(height: AppSpacing.xs),
               Align(
@@ -103,10 +103,10 @@ class GameDetailsSection extends StatelessWidget {
                   spacing: AppSpacing.xs,
                   runSpacing: AppSpacing.xs,
                   children: [
-                    _buildSkillChip('all', 'All Levels'),
-                    _buildSkillChip('beginner', 'Beginner'),
-                    _buildSkillChip('intermediate', 'Intermediate'),
-                    _buildSkillChip('advanced', 'Advanced'),
+                    _buildSkillChip(theme, 'all', 'All Levels'),
+                    _buildSkillChip(theme, 'beginner', 'Beginner'),
+                    _buildSkillChip(theme, 'intermediate', 'Intermediate'),
+                    _buildSkillChip(theme, 'advanced', 'Advanced'),
                   ],
                 ),
               ),

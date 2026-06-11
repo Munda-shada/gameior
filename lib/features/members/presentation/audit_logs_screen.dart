@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/audit_log.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -88,33 +86,35 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
     }
   }
 
-  Color _getLogIconColor(AuditLog log) {
+  Color _getLogIconColor(BuildContext context, AuditLog log) {
+    final theme = Theme.of(context);
     switch (log.action) {
       case AuditAction.memberJoined:
       case AuditAction.joinRequestAccepted:
-        return AppColors.primary;
+        return theme.colorScheme.primary;
       case AuditAction.memberLeft:
       case AuditAction.memberRemoved:
       case AuditAction.joinRequestRejected:
-        return AppColors.destructive;
+        return theme.colorScheme.error;
       case AuditAction.rolePromoted:
       case AuditAction.roleDemoted:
       case AuditAction.ownershipTransferred:
-        return AppColors.waitlist;
+        return theme.colorScheme.tertiary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final logsAsync = ref.watch(groupAuditLogsProvider(widget.groupId));
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Admin Logs'),
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: Column(
         children: [
@@ -136,9 +136,9 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
                     child: ChoiceChip(
                       label: Text(label),
                       selected: isSelected,
-                      selectedColor: AppColors.primary,
+                      selectedColor: theme.colorScheme.primary,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.bold,
                       ),
                       onSelected: (selected) {
@@ -188,28 +188,28 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
                       final log = filtered[index];
                       final dateStr = DateFormat('MMM d, yyyy • h:mm a').format(log.createdAt.toLocal());
                       final icon = _getLogIcon(log);
-                      final iconColor = _getLogIconColor(log);
+                      final iconColor = _getLogIconColor(context, log);
                       final desc = _getLogDescription(log);
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                         elevation: 0,
-                        color: AppColors.surface,
+                        color: theme.colorScheme.surfaceContainer,
                         child: ListTile(
                           leading: Container(
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: iconColor.withOpacity(0.1),
+                              color: iconColor.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(icon, color: iconColor),
                           ),
-                          title: Text(desc, style: AppTextStyles.bodyMedium),
+                          title: Text(desc, style: theme.textTheme.bodyMedium),
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(dateStr, style: AppTextStyles.caption.copyWith(color: AppColors.textDisabled)),
+                            child: Text(dateStr, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
                           ),
                         ),
                       );

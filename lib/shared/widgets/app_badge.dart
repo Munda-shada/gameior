@@ -20,22 +20,50 @@ class AppBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Color badgeColor;
+    Color badgeBgColor;
+
+    switch (variant) {
+      case AppBadgeVariant.confirmed:
+        badgeColor = theme.colorScheme.primary;
+        badgeBgColor = theme.colorScheme.primary.withValues(alpha: 0.12);
+      case AppBadgeVariant.waitlist:
+      case AppBadgeVariant.maybe:
+        badgeColor = theme.colorScheme.tertiary;
+        badgeBgColor = theme.colorScheme.tertiary.withValues(alpha: 0.12);
+      case AppBadgeVariant.unanswered:
+      case AppBadgeVariant.no:
+        badgeColor = theme.colorScheme.outline;
+        badgeBgColor = theme.colorScheme.outline.withValues(alpha: 0.12);
+      case AppBadgeVariant.role:
+        badgeColor = theme.colorScheme.secondary;
+        badgeBgColor = theme.colorScheme.secondary.withValues(alpha: 0.12);
+      case AppBadgeVariant.custom:
+        badgeColor = color ?? theme.colorScheme.onSurface;
+        badgeBgColor = mutedColor ?? theme.colorScheme.surfaceContainer;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: mutedColor ?? Colors.grey.shade200,
+        color: badgeBgColor,
         borderRadius: BorderRadius.circular(16.0),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (leadingDot) ...[
-            Icon(Icons.circle, size: 8.0, color: color ?? Colors.grey),
+            Icon(Icons.circle, size: 8.0, color: badgeColor),
             const SizedBox(width: 4.0),
           ],
           Text(
             label,
-            style: TextStyle(color: color ?? Colors.black, fontSize: 12.0),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: badgeColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

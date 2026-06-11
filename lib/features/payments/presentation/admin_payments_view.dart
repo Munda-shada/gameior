@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/payments/application/payments_providers.dart';
 import 'package:gameior/features/payments/domain/payment_due.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -46,7 +44,7 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
     final filterPlayerId = ref.watch(paymentsPlayerFilterProvider(widget.groupId));
     if (filterPlayerId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (context.mounted) {
           setState(() {
             _byPlayer = true;
             _expandedIds.add(filterPlayerId);
@@ -59,9 +57,10 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
     final byGameAsync = ref.watch(adminDuesByGameProvider(widget.groupId));
 
     final hasDues = _byPlayer ? (byPlayerAsync.valueOrNull?.isNotEmpty ?? false) : (byGameAsync.valueOrNull?.isNotEmpty ?? false);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
           // Top settings and toggle bar
@@ -84,7 +83,7 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 IconButton(
-                  icon: const Icon(Icons.settings_outlined, color: AppColors.textSecondary),
+                  icon: Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
                   onPressed: () {
                     showAppBottomSheet(
                       context: context,
@@ -113,15 +112,15 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
                           await ref
                               .read(adminDuesNotifierProvider(widget.groupId).notifier)
                               .triggerReminders();
-                          if (mounted) {
+                          if (context.mounted) {
                             showToast(context, 'Reminders sent to all members with pending dues!');
                           }
                         } catch (e) {
-                          if (mounted) {
+                          if (context.mounted) {
                             showToast(context, 'Failed to send reminders: $e', isError: true);
                           }
                         } finally {
-                          if (mounted) {
+                          if (context.mounted) {
                             setState(() => _isReminding = false);
                           }
                         }
@@ -159,29 +158,29 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                               clipBehavior: Clip.antiAlias,
                               elevation: 0,
-                              color: AppColors.surface,
+                              color: theme.colorScheme.surfaceContainer,
                               child: Column(
                                 children: [
                                   ListTile(
                                     leading: _PlayerAvatar(summary.playerEmoji),
-                                    title: Text(summary.playerName, style: AppTextStyles.headlineSmall),
-                                    subtitle: Text('${summary.gameCount} pending match${summary.gameCount > 1 ? 'es' : ''}', style: AppTextStyles.bodySmall),
+                                    title: Text(summary.playerName, style: theme.textTheme.headlineSmall),
+                                    subtitle: Text('${summary.gameCount} pending match${summary.gameCount > 1 ? 'es' : ''}', style: theme.textTheme.bodySmall),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           '₹${(summary.totalPendingPaise / 100.0).toStringAsFixed(0)}',
-                                          style: AppTextStyles.headlineLarge.copyWith(color: AppColors.destructive),
+                                          style: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.error),
                                         ),
                                         const SizedBox(width: AppSpacing.xs),
-                                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: AppColors.textDisabled),
+                                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                                       ],
                                     ),
                                     onTap: () => _toggleExpand(summary.playerId),
                                   ),
                                   if (isExpanded) ...[
                                     const Divider(height: 1),
-                                    ...summary.dues.map((due) => _buildPlayerDueRow(due)),
+                                    ...summary.dues.map((due) => _buildPlayerDueRow(due, theme)),
                                   ]
                                 ],
                               ),
@@ -220,28 +219,28 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                               clipBehavior: Clip.antiAlias,
                               elevation: 0,
-                              color: AppColors.surface,
+                              color: theme.colorScheme.surfaceContainer,
                               child: Column(
                                 children: [
                                   ListTile(
-                                    title: Text(summary.gameTitle, style: AppTextStyles.headlineSmall),
-                                    subtitle: Text('$formattedDate • ${summary.unpaidCount} unpaid', style: AppTextStyles.bodySmall),
+                                    title: Text(summary.gameTitle, style: theme.textTheme.headlineSmall),
+                                    subtitle: Text('$formattedDate • ${summary.unpaidCount} unpaid', style: theme.textTheme.bodySmall),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           '₹${(summary.totalPendingPaise / 100.0).toStringAsFixed(0)}',
-                                          style: AppTextStyles.headlineLarge.copyWith(color: AppColors.destructive),
+                                          style: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.error),
                                         ),
                                         const SizedBox(width: AppSpacing.xs),
-                                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: AppColors.textDisabled),
+                                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                                       ],
                                     ),
                                     onTap: () => _toggleExpand(summary.gameId),
                                   ),
                                   if (isExpanded) ...[
                                     const Divider(height: 1),
-                                    ...summary.playerDues.map((item) => _buildGameApprovalRow(item)),
+                                    ...summary.playerDues.map((item) => _buildGameApprovalRow(item, theme)),
                                   ]
                                 ],
                               ),
@@ -257,12 +256,12 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
     );
   }
 
-  Widget _buildPlayerDueRow(PaymentDue due) {
+  Widget _buildPlayerDueRow(PaymentDue due, ThemeData theme) {
     final double rupees = due.amountPaise / 100.0;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -271,7 +270,7 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(due.gameTitle, style: AppTextStyles.labelLarge),
+                Text(due.gameTitle, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 2),
                 StatusBadge(status: due.status),
               ],
@@ -279,7 +278,7 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
           ),
           Row(
             children: [
-              Text('₹${rupees.toStringAsFixed(0)}', style: AppTextStyles.headlineSmall),
+              Text('₹${rupees.toStringAsFixed(0)}', style: theme.textTheme.headlineSmall),
               const SizedBox(width: AppSpacing.sm),
               if (due.status != DueStatus.paid)
                 TextButton(
@@ -300,13 +299,13 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
     );
   }
 
-  Widget _buildGameApprovalRow(GamePlayerDue item) {
+  Widget _buildGameApprovalRow(GamePlayerDue item, ThemeData theme) {
     final due = item.due;
     final double rupees = due.amountPaise / 100.0;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant)),
       ),
       child: Row(
         children: [
@@ -316,9 +315,9 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.playerName, style: AppTextStyles.labelLarge),
+                Text(item.playerName, style: theme.textTheme.labelLarge),
                 if (due.utrReference != null)
-                  Text('UTR: ${due.utrReference}', style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary)),
+                  Text('UTR: ${due.utrReference}', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurface)),
                 const SizedBox(height: 2),
                 StatusBadge(status: due.status),
               ],
@@ -326,11 +325,11 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
           ),
           Row(
             children: [
-              Text('₹${rupees.toStringAsFixed(0)}', style: AppTextStyles.headlineSmall),
+              Text('₹${rupees.toStringAsFixed(0)}', style: theme.textTheme.headlineSmall),
               const SizedBox(width: AppSpacing.sm),
               if (due.status == DueStatus.pendingVerification) ...[
                 IconButton(
-                  icon: const Icon(Icons.check_circle_outline, color: AppColors.primary),
+                  icon: Icon(Icons.check_circle_outline, color: theme.colorScheme.primary),
                   onPressed: () async {
                     try {
                       await ref.read(adminDuesNotifierProvider(widget.groupId).notifier).approve(due.id);
@@ -341,7 +340,7 @@ class _AdminPaymentsViewState extends ConsumerState<AdminPaymentsView> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.cancel_outlined, color: AppColors.destructive),
+                  icon: Icon(Icons.cancel_outlined, color: theme.colorScheme.error),
                   onPressed: () async {
                     try {
                       await ref.read(adminDuesNotifierProvider(widget.groupId).notifier).reject(due.id);
@@ -377,11 +376,12 @@ class _PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 40,
       height: 40,
-      decoration: const BoxDecoration(
-        color: AppColors.background,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,

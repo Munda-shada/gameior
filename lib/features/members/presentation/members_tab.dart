@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -26,11 +24,12 @@ class _MembersTabState extends ConsumerState<MembersTab> {
   @override
   Widget build(BuildContext context) {
     final contextAsync = ref.watch(groupContextProvider(widget.groupId));
+    final theme = Theme.of(context);
 
     return contextAsync.when(
       loading: () => const AppLoadingShimmer(type: ShimmerType.card),
       error: (e, _) => Center(
-        child: Text('Failed to load group context', style: AppTextStyles.bodyMedium),
+        child: Text('Failed to load group context', style: theme.textTheme.bodyMedium),
       ),
       data: (groupCtx) {
         final myRole = groupCtx.myRole;
@@ -54,7 +53,7 @@ class _MembersTabState extends ConsumerState<MembersTab> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.border.withOpacity(0.3),
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Row(

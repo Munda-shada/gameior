@@ -14,6 +14,7 @@ class CapacityProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final double progress = capacity > 0 ? (confirmed / capacity).clamp(0.0, 1.0) : 0.0;
     final bool isFull = confirmed >= capacity;
 
@@ -24,10 +25,9 @@ class CapacityProgressBar extends StatelessWidget {
         if (showLabel) ...[
           Text(
             '$confirmed / $capacity spots filled',
-            style: TextStyle(
-              fontSize: 12.0,
+            style: (theme.textTheme.bodySmall ?? const TextStyle(fontSize: 12.0)).copyWith(
               fontWeight: isFull ? FontWeight.bold : FontWeight.normal,
-              color: isFull ? Colors.orange : Colors.grey[600],
+              color: isFull ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 6.0),
@@ -36,8 +36,8 @@ class CapacityProgressBar extends StatelessWidget {
           value: progress,
           minHeight: 6.0,
           borderRadius: BorderRadius.circular(3.0),
-          backgroundColor: Colors.grey[200],
-          color: isFull ? Colors.orange : Colors.green,
+          backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
+          color: isFull ? theme.colorScheme.tertiary : theme.colorScheme.primary,
         ),
       ],
     );

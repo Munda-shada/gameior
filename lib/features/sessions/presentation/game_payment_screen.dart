@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
@@ -188,8 +187,10 @@ class _GamePaymentScreenState extends ConsumerState<GamePaymentScreen> {
         );
         final String? dueId = myDue?['id'] as String?;
 
+        final theme = Theme.of(context);
+
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: theme.colorScheme.surface,
           appBar: AppBar(
             title: const Text('Complete Payment'),
           ),

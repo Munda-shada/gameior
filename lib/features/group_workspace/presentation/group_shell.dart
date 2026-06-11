@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_loading_shimmer.dart';
@@ -36,6 +34,7 @@ class _GroupShellState extends ConsumerState<GroupShell> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final contextAsync = ref.watch(groupContextProvider(widget.groupId));
 
     return contextAsync.when(
@@ -68,15 +67,22 @@ class _GroupShellState extends ConsumerState<GroupShell> {
         final currentIndex = ref.watch(groupWorkspaceTabProvider(widget.groupId));
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: theme.colorScheme.surfaceContainerLowest,
           appBar: AppBar(
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(group.name, style: AppTextStyles.headlineMedium),
+                Text(
+                  group.name,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 Text(
                   '${group.sport.name.toUpperCase()} • ${groupContext.inviteCode}',
-                  style: AppTextStyles.caption,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -85,19 +91,23 @@ class _GroupShellState extends ConsumerState<GroupShell> {
               onPressed: () => context.go('/home/groups'),
             ),
             actions: [
-              _buildRoleBadge(myRole),
+              _buildRoleBadge(myRole, theme),
               const SizedBox(width: AppSpacing.sm),
             ],
           ),
           body: tabs[currentIndex],
           bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.border)),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                ),
+              ),
             ),
             child: BottomNavigationBar(
               currentIndex: currentIndex,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: AppColors.textDisabled,
+              selectedItemColor: theme.colorScheme.primary,
+              unselectedItemColor: theme.colorScheme.outline,
               type: BottomNavigationBarType.fixed,
               onTap: (index) => ref.read(groupWorkspaceTabProvider(widget.groupId).notifier).state = index,
               items: const [
@@ -134,41 +144,29 @@ class _GroupShellState extends ConsumerState<GroupShell> {
     );
   }
 
-  Widget _buildRoleBadge(MemberRole role) {
-    Color color = Colors.grey;
+  Widget _buildRoleBadge(MemberRole role, ThemeData theme) {
+    Color color = theme.colorScheme.outline;
     String label = 'Player';
     if (role == MemberRole.host) {
-      color = AppColors.waitlist; // Orange
+      color = Colors.orange;
       label = 'Host';
     } else if (role == MemberRole.coHost) {
-      color = Colors.blue;
+      color = theme.colorScheme.secondary;
       label = 'Co-Host';
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
-        style: AppTextStyles.labelSmall.copyWith(color: color, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderTab(String name) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.construction, size: 64, color: AppColors.textDisabled),
-          const SizedBox(height: AppSpacing.base),
-          Text(name, style: AppTextStyles.headlineMedium),
-          const SizedBox(height: AppSpacing.sm),
-          const Text('Coming in the next sprint!', style: AppTextStyles.bodyMedium),
-        ],
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

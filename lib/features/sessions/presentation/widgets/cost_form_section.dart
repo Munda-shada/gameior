@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 import 'package:gameior/features/sessions/presentation/widgets/cost_breakdown_editor.dart';
 
@@ -36,6 +34,8 @@ class CostFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -43,9 +43,9 @@ class CostFormSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,9 +67,9 @@ class CostFormSection extends StatelessWidget {
 
               // Cost items accordion
               ExpansionTile(
-                leading: const Icon(Icons.calculate_outlined, color: AppColors.primary),
-                title: const Text('Add Cost Breakdown', style: AppTextStyles.headlineSmall),
-                subtitle: const Text('Sum elements to calculate total cost', style: AppTextStyles.bodySmall),
+                leading: Icon(Icons.calculate_outlined, color: theme.colorScheme.primary),
+                title: Text('Add Cost Breakdown', style: theme.textTheme.headlineSmall),
+                subtitle: Text('Sum elements to calculate total cost', style: theme.textTheme.bodySmall),
                 initiallyExpanded: showCostBreakdown,
                 onExpansionChanged: allDuesSettled ? null : onCostBreakdownExpanded,
                 children: [
@@ -85,10 +85,10 @@ class CostFormSection extends StatelessWidget {
               const Divider(height: AppSpacing.lg),
 
               SwitchListTile.adaptive(
-                activeTrackColor: AppColors.primary,
+                activeTrackColor: theme.colorScheme.primary,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Charge all RSVPed players', style: AppTextStyles.headlineSmall),
-                subtitle: const Text('If off, only checked attendees below will be charged', style: AppTextStyles.bodySmall),
+                title: Text('Charge all RSVPed players', style: theme.textTheme.headlineSmall),
+                subtitle: Text('If off, only checked attendees below will be charged', style: theme.textTheme.bodySmall),
                 value: chargeAllRsvped,
                 onChanged: allDuesSettled ? null : onChargeAllRsvpedChanged,
               ),

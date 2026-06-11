@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/constants/app_constants.dart';
 
 part 'feed_providers.g.dart';
 

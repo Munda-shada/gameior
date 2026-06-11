@@ -15,21 +15,27 @@ class AppLoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surfaceColor = theme.colorScheme.surfaceContainerHighest;
+    final baseColor = surfaceColor.withValues(alpha: 0.6);
+    final highlightColor = surfaceColor.withValues(alpha: 0.2);
+    final skeletonColor = surfaceColor;
+
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: child ?? _buildSkeleton(),
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: child ?? _buildSkeleton(skeletonColor),
     );
   }
 
-  Widget _buildSkeleton() {
+  Widget _buildSkeleton(Color skeletonColor) {
     switch (type) {
       case ShimmerType.card:
         return Container(
           height: 100,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: skeletonColor,
             borderRadius: BorderRadius.circular(12),
           ),
         );
@@ -41,8 +47,8 @@ class AppLoadingShimmer extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: skeletonColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -51,9 +57,9 @@ class AppLoadingShimmer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: double.infinity, height: 12, color: Colors.white),
+                    Container(width: double.infinity, height: 12, color: skeletonColor),
                     const SizedBox(height: 8),
-                    Container(width: 150, height: 10, color: Colors.white),
+                    Container(width: 150, height: 10, color: skeletonColor),
                   ],
                 ),
               ),
@@ -66,7 +72,7 @@ class AppLoadingShimmer extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: skeletonColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -76,7 +82,7 @@ class AppLoadingShimmer extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: skeletonColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -85,13 +91,13 @@ class AppLoadingShimmer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: 140, height: 14, color: Colors.white),
+                    Container(width: 140, height: 14, color: skeletonColor),
                     const SizedBox(height: 8),
-                    Container(width: 100, height: 10, color: Colors.white),
+                    Container(width: 100, height: 10, color: skeletonColor),
                     const SizedBox(height: 6),
-                    Container(width: 180, height: 10, color: Colors.white),
+                    Container(width: 180, height: 10, color: skeletonColor),
                     const Spacer(),
-                    Container(width: double.infinity, height: 6, color: Colors.white),
+                    Container(width: double.infinity, height: 6, color: skeletonColor),
                   ],
                 ),
               ),
@@ -106,8 +112,8 @@ class AppLoadingShimmer extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: skeletonColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -116,13 +122,13 @@ class AppLoadingShimmer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: 120, height: 12, color: Colors.white),
+                    Container(width: 120, height: 12, color: skeletonColor),
                     const SizedBox(height: 6),
-                    Container(width: 60, height: 10, color: Colors.white),
+                    Container(width: 60, height: 10, color: skeletonColor),
                   ],
                 ),
               ),
-              Container(width: 50, height: 16, color: Colors.white),
+              Container(width: 50, height: 16, color: skeletonColor),
             ],
           ),
         );
@@ -134,8 +140,8 @@ class AppLoadingShimmer extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: skeletonColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -144,18 +150,18 @@ class AppLoadingShimmer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(width: 100, height: 12, color: Colors.white),
+                    Container(width: 100, height: 12, color: skeletonColor),
                     const SizedBox(height: 6),
-                    Container(width: 130, height: 10, color: Colors.white),
+                    Container(width: 130, height: 10, color: skeletonColor),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(width: 40, height: 12, color: Colors.white),
+                  Container(width: 40, height: 12, color: skeletonColor),
                   const SizedBox(height: 6),
-                  Container(width: 60, height: 14, color: Colors.white),
+                  Container(width: 60, height: 14, color: skeletonColor),
                 ],
               ),
             ],

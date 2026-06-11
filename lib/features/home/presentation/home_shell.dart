@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 
 class HomeShell extends StatelessWidget {
   final StatefulNavigationShell shell;
   const HomeShell({super.key, required this.shell});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       body: shell,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2))),
         ),
         child: BottomNavigationBar(
           currentIndex: shell.currentIndex,

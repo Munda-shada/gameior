@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -18,6 +16,7 @@ class JoinRequestsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final requestsAsync = ref.watch(groupJoinRequestsProvider(groupId));
+    final theme = Theme.of(context);
 
     return requestsAsync.when(
       loading: () => const SingleChildScrollView(
@@ -53,7 +52,7 @@ class JoinRequestsView extends ConsumerWidget {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  side: BorderSide(color: AppColors.border.withOpacity(0.5)),
+                  side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.base),
@@ -66,7 +65,7 @@ class JoinRequestsView extends ConsumerWidget {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: AppColors.border.withOpacity(0.2),
+                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -78,9 +77,9 @@ class JoinRequestsView extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(req.displayName, style: AppTextStyles.headlineSmall),
+                                Text(req.displayName, style: theme.textTheme.headlineSmall),
                                 const SizedBox(height: 2),
-                                Text(req.phone, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                                Text(req.phone, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                               ],
                             ),
                           ),

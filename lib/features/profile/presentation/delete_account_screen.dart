@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:gameior/core/theme/app_colors.dart';
+
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
@@ -103,8 +103,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.destructive,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(dialogCtx).colorScheme.error,
+                      foregroundColor: Theme.of(dialogCtx).colorScheme.onError,
                     ),
                     onPressed: isValid ? () => Navigator.pop(dialogCtx, true) : null,
                     child: const Text('Confirm'),
@@ -219,7 +219,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
           final coHost = coHosts[index];
           return ListTile(
             title: Text(coHost['display_name']),
-            leading: const Icon(Icons.person, color: AppColors.primary),
+            leading: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
             onTap: () {
               Navigator.pop(context);
               _transferOwnership(group, coHost);
@@ -232,9 +232,10 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_hostedGroupsState == null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(title: const Text('Delete Account')),
         body: const Padding(
           padding: EdgeInsets.all(AppSpacing.base),
@@ -250,7 +251,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Delete Account'),
       ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class BillingPreviewCard extends StatelessWidget {
   final double perHeadRupees;
@@ -15,12 +13,14 @@ class BillingPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.primaryMuted,
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -29,11 +29,11 @@ class BillingPreviewCard extends StatelessWidget {
             children: [
               Text(
                 'Per-head Cost:',
-                style: AppTextStyles.headlineSmall.copyWith(color: AppColors.primaryDark),
+                style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.primary),
               ),
               Text(
                 '₹${perHeadRupees.toStringAsFixed(2)}',
-                style: AppTextStyles.displayLarge.copyWith(color: AppColors.primaryDark),
+                style: theme.textTheme.displayLarge?.copyWith(color: theme.colorScheme.primary),
               ),
             ],
           ),
@@ -43,12 +43,12 @@ class BillingPreviewCard extends StatelessWidget {
             children: [
               Text(
                 'Total Divisor:',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryDark),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
               ),
               Text(
                 '$chargedCount players billed',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.primaryDark,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),

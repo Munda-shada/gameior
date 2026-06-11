@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/payments/application/payments_providers.dart';
 import 'package:gameior/features/payments/domain/payment_due.dart';
@@ -87,6 +85,7 @@ class _SettlePaymentSheetState extends ConsumerState<SettlePaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final upiId = widget.due.games?['upi_id'] as String? ?? widget.fallbackUpiId;
     final gameTitle = widget.due.gameTitle;
     final amountPaise = widget.due.amountPaise;
@@ -104,11 +103,11 @@ class _SettlePaymentSheetState extends ConsumerState<SettlePaymentSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(gameTitle, style: AppTextStyles.headlineMedium),
+            Text(gameTitle, style: theme.textTheme.headlineMedium),
             const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
-                Expanded(child: SelectableText('Pay to UPI: $upiId', style: AppTextStyles.bodyMedium)),
+                Expanded(child: SelectableText('Pay to UPI: $upiId', style: theme.textTheme.bodyMedium)),
                 IconButton(
                   icon: const Icon(Icons.copy, size: 16),
                   onPressed: () {
@@ -123,17 +122,17 @@ class _SettlePaymentSheetState extends ConsumerState<SettlePaymentSheet> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.base),
               decoration: BoxDecoration(
-                color: AppColors.primaryMuted,
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Dues Payable', style: AppTextStyles.headlineSmall),
+                  Text('Dues Payable', style: theme.textTheme.headlineSmall),
                   Text(
                     '₹${(amountPaise / 100.0).toStringAsFixed(0)}',
-                    style: AppTextStyles.displayMedium.copyWith(color: AppColors.primaryDark),
+                    style: theme.textTheme.displayMedium?.copyWith(color: theme.colorScheme.primary),
                   ),
                 ],
               ),
@@ -144,8 +143,8 @@ class _SettlePaymentSheetState extends ConsumerState<SettlePaymentSheet> {
               icon: const Icon(Icons.open_in_new),
               label: const Text('Open UPI App'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 minimumSize: const Size(double.infinity, 45),
                 elevation: 0,
               ),

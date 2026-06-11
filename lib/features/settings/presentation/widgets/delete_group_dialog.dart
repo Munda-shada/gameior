@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class DeleteGroupDialog extends StatefulWidget {
   final String groupName;
@@ -25,20 +23,21 @@ class _DeleteGroupDialogState extends State<DeleteGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Delete Group Permanently?'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'This action CANNOT be undone. All games, announcements, and payment history will be permanently deleted.',
-            style: TextStyle(color: AppColors.destructive, fontSize: 13),
+            style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
           ),
           const SizedBox(height: AppSpacing.base),
           Text(
             'Type the group name "${widget.groupName}" to confirm deletion:',
-            style: AppTextStyles.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
@@ -62,8 +61,8 @@ class _DeleteGroupDialogState extends State<DeleteGroupDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.destructive,
-            foregroundColor: Colors.white,
+            backgroundColor: theme.colorScheme.error,
+            foregroundColor: theme.colorScheme.onError,
           ),
           onPressed: (_isValid && !_isSubmitting)
               ? () async {
@@ -77,7 +76,14 @@ class _DeleteGroupDialogState extends State<DeleteGroupDialog> {
                 }
               : null,
           child: _isSubmitting
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.onError,
+                  ),
+                )
               : const Text('Delete Forever'),
         ),
       ],

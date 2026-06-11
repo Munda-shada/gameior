@@ -19,14 +19,16 @@ import 'package:gameior/features/sessions/presentation/game_detail_screen.dart';
 import 'package:gameior/features/sessions/presentation/game_payment_screen.dart';
 import 'package:gameior/features/sessions/presentation/complete_game_screen.dart';
 import 'package:gameior/features/sessions/presentation/create_game_screen.dart';
+import 'package:gameior/features/auth/presentation/splash_provider.dart';
 import 'package:gameior/features/members/presentation/audit_logs_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
-    _ref.listen(authStateProvider, (_, __) => notifyListeners());
-    _ref.listen(currentUserProvider, (_, __) => notifyListeners());
+    _ref.listen(authStateProvider, (previous, next) => notifyListeners());
+    _ref.listen(currentUserProvider, (previous, next) => notifyListeners());
+    _ref.listen(splashAnimationCompletedProvider, (previous, next) => notifyListeners());
   }
 }
 
@@ -41,36 +43,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     refreshListenable: routerNotifier,
     redirect: (context, state) {
-  final authState = ref.read(authStateProvider);
-  final profileState = ref.read(currentUserProvider);
-  
-  final isAuthenticated = authState.valueOrNull?.session != null;
-  final isLoading = profileState.isLoading && profileState.valueOrNull == null;
-  final isProfileComplete = profileState.valueOrNull?.isProfileComplete ?? false;
+      final authState = ref.read(authStateProvider);
+      final profileState = ref.read(currentUserProvider);
+      
+      final isAuthenticated = authState.valueOrNull?.session != null;
+      final isLoading = profileState.isLoading && profileState.valueOrNull == null;
+      final isProfileComplete = profileState.valueOrNull?.isProfileComplete ?? false;
 
-  final location = state.matchedLocation;
-  final onAuthPages = location == '/login' 
-                   || location == '/signup' 
-                   || location == '/splash';
+      final location = state.matchedLocation;
+      final onAuthPages = location == '/login' 
+                       || location == '/signup' 
+                       || location == '/splash';
 
-  // Still loading profile — don't interrupt the user's flow
-  if (isAuthenticated && isLoading) {
-    if (onAuthPages) return '/splash';
-    return null;
-  }
+      // Keep user on splash screen until the 2-second animation completes
+      final isSplashCompleted = ref.read(splashAnimationCompletedProvider);
+      if (!isSplashCompleted) {
+        return '/splash';
+      }
 
-  // Not logged in → go to login
-  if (!isAuthenticated && !onAuthPages) return '/login';
-  if (!isAuthenticated) return null;
+      // Still loading profile — don't interrupt the user's flow
+      if (isAuthenticated && isLoading) {
+        if (onAuthPages) return '/splash';
+        return null;
+      }
 
-  // Logged in but profile incomplete → go to signup
-  if (!isProfileComplete && location != '/signup') return '/signup';
+      // Not logged in → go to login
+      if (!isAuthenticated && !onAuthPages) return '/login';
+      if (!isAuthenticated) return '/login';
 
-  // Logged in, profile complete, on an auth page → go to app
-  if (isProfileComplete && onAuthPages) return '/home/feed';
+      // Logged in but profile incomplete → go to signup
+      if (!isProfileComplete && location != '/signup') return '/signup';
 
-  return null;
-},
+      // Logged in, profile complete, on an auth page → go to app
+      if (isProfileComplete && onAuthPages) return '/home/feed';
+
+      return null;
+    },
     routes: [
   GoRoute(path: '/splash',  builder: (context, state) => const SplashScreen()),
   GoRoute(path: '/login',   builder: (context, state) => const LoginScreen()),

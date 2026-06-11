@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/capacity_progress_bar.dart';
 
 class UpcomingSessionTile extends StatelessWidget {
@@ -18,6 +16,7 @@ class UpcomingSessionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final gameId = game['id'] as String;
     final groupId = game['group_id'] as String;
     final title = game['title'] as String? ?? 'Match Session';
@@ -76,7 +75,7 @@ class UpcomingSessionTile extends StatelessWidget {
     }
 
     // RSVP badge config
-    RsvpBadgeConfig badgeConfig = rsvpBadge(myStatus, myWaitlistPos);
+    RsvpBadgeConfig badgeConfig = rsvpBadge(myStatus, myWaitlistPos, theme);
 
     // Cost label
     final costLabel = paymentModel == 'prepaid' && costPaise > 0
@@ -90,9 +89,9 @@ class UpcomingSessionTile extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         ),
         child: Column(
           children: [
@@ -117,17 +116,18 @@ class UpcomingSessionTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           groupName.toUpperCase(),
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.primary,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
                             letterSpacing: 0.8,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       if (isLocked || deadlinePassed)
-                        const Icon(
+                        Icon(
                           Icons.lock_outline,
                           size: 14,
-                          color: AppColors.textDisabled,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                     ],
                   ),
@@ -135,7 +135,9 @@ class UpcomingSessionTile extends StatelessWidget {
                   // Title
                   Text(
                     title,
-                    style: AppTextStyles.headlineSmall,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -143,33 +145,35 @@ class UpcomingSessionTile extends StatelessWidget {
                   // Date + venue row
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.schedule_outlined,
                         size: 13,
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      Text(dateLabel,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          )),
+                      Text(
+                        dateLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                   if (venue.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
                           size: 13,
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             venue,
-                            style: AppTextStyles.bodySmall,
+                            style: theme.textTheme.bodySmall,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -189,23 +193,49 @@ class UpcomingSessionTile extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Cost chip
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Text(
-                          costLabel,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textSecondary,
+                      // Cost chip + Payment model row
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                              border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+                            ),
+                            child: Text(
+                              costLabel,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                              border: Border.all(
+                                color: theme.colorScheme.secondary.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              paymentModel.toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.secondary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 9,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       // RSVP status badge
                       Container(
@@ -214,10 +244,10 @@ class UpcomingSessionTile extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: badgeConfig.color.withOpacity(0.12),
+                          color: badgeConfig.color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(AppRadius.full),
                           border: Border.all(
-                            color: badgeConfig.color.withOpacity(0.4),
+                            color: badgeConfig.color.withValues(alpha: 0.4),
                           ),
                         ),
                         child: Row(
@@ -231,7 +261,7 @@ class UpcomingSessionTile extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               badgeConfig.label,
-                              style: AppTextStyles.labelSmall.copyWith(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 color: badgeConfig.color,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 10,
@@ -263,38 +293,38 @@ class RsvpBadgeConfig {
   });
 }
 
-RsvpBadgeConfig rsvpBadge(String status, int? waitlistPos) {
+RsvpBadgeConfig rsvpBadge(String status, int? waitlistPos, ThemeData theme) {
   switch (status) {
     case 'yes':
     case 'guest':
       return RsvpBadgeConfig(
         label: 'Confirmed',
-        color: AppColors.primary,
+        color: theme.colorScheme.primary,
         icon: Icons.check_circle_outline,
       );
     case 'waitlist':
       final pos = waitlistPos != null ? ' #$waitlistPos' : '';
       return RsvpBadgeConfig(
         label: 'Waitlist$pos',
-        color: AppColors.waitlist,
+        color: theme.colorScheme.tertiary,
         icon: Icons.hourglass_top_outlined,
       );
     case 'maybe':
       return RsvpBadgeConfig(
         label: 'Maybe',
-        color: AppColors.waitlist,
+        color: theme.colorScheme.tertiary,
         icon: Icons.help_outline,
       );
     case 'no':
       return RsvpBadgeConfig(
         label: 'Not Going',
-        color: AppColors.textDisabled,
+        color: theme.colorScheme.outline,
         icon: Icons.cancel_outlined,
       );
     default:
       return RsvpBadgeConfig(
         label: "Not RSVP'd yet",
-        color: AppColors.unanswered,
+        color: theme.colorScheme.onSurfaceVariant,
         icon: Icons.radio_button_unchecked,
       );
   }

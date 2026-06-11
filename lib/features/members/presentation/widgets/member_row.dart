@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/features/members/presentation/widgets/member_stats_sheet.dart';
@@ -24,14 +23,15 @@ class MemberRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final client = ref.watch(supabaseClientProvider);
     final isMe = member.userId == client.auth.currentUser?.id;
+    final theme = Theme.of(context);
 
-    Color roleColor = Colors.grey;
+    Color roleColor = theme.colorScheme.outline;
     String roleLabel = 'Player';
     if (member.role == MemberRole.host) {
-      roleColor = AppColors.waitlist;
+      roleColor = theme.colorScheme.tertiary;
       roleLabel = 'Host';
     } else if (member.role == MemberRole.coHost) {
-      roleColor = Colors.blue;
+      roleColor = theme.colorScheme.secondary;
       roleLabel = 'Co-Host';
     }
 
@@ -40,7 +40,7 @@ class MemberRow extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: AppColors.border.withOpacity(0.5)),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -51,9 +51,9 @@ class MemberRow extends ConsumerWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: roleColor.withOpacity(0.08),
+            color: roleColor.withValues(alpha: 0.08),
             shape: BoxShape.circle,
-            border: Border.all(color: roleColor.withOpacity(0.3), width: 1.5),
+            border: Border.all(color: roleColor.withValues(alpha: 0.3), width: 1.5),
           ),
           child: Center(
             child: Text(
@@ -67,7 +67,7 @@ class MemberRow extends ConsumerWidget {
             Expanded(
               child: Text(
                 member.displayName + (isMe ? ' (You)' : ''),
-                style: AppTextStyles.headlineSmall.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
                 ),
                 maxLines: 1,
@@ -78,12 +78,12 @@ class MemberRow extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: roleColor.withOpacity(0.1),
+                color: roleColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Text(
                 roleLabel,
-                style: AppTextStyles.labelSmall.copyWith(
+                style: theme.textTheme.labelSmall?.copyWith(
                   color: roleColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -93,9 +93,33 @@ class MemberRow extends ConsumerWidget {
         ),
         subtitle: Text(
           member.phone,
-          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        trailing: member.phone.isNotEmpty
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.phone, color: theme.colorScheme.primary, size: 20),
+                    tooltip: 'Call',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => launchUrl(Uri.parse('tel:${member.phone}')),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.chat, color: Color(0xFF25D366), size: 20),
+                    tooltip: 'WhatsApp',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => launchUrl(
+                      Uri.parse('https://wa.me/${member.phone.replaceAll('+', '')}'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  ),
+                ],
+              )
+            : Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
         onTap: () => _showMemberProfileSheet(context),
       ),
     );

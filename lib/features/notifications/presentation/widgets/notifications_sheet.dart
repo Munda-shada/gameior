@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/notifications/application/notifications_providers.dart';
 import 'package:gameior/features/notifications/domain/notification_model.dart';
 import 'package:gameior/core/firebase/fcm_service.dart';
@@ -59,12 +57,13 @@ class NotificationsSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: notificationsAsync.when(
         loading: () => const Center(
@@ -76,7 +75,10 @@ class NotificationsSheet extends ConsumerWidget {
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Text('Error loading notifications: $err', style: const TextStyle(color: AppColors.destructive)),
+            child: Text(
+              'Error loading notifications: $err',
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
           ),
         ),
         data: (list) {
@@ -85,9 +87,16 @@ class NotificationsSheet extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.notifications_off_outlined, size: 64, color: AppColors.textDisabled),
+                  Icon(
+                    Icons.notifications_off_outlined,
+                    size: 64,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(height: AppSpacing.base),
-                  Text('No notifications yet', style: AppTextStyles.bodyLarge),
+                  Text(
+                    'No notifications yet',
+                    style: theme.textTheme.bodyLarge,
+                  ),
                 ],
               ),
             );
@@ -124,24 +133,26 @@ class NotificationsSheet extends ConsumerWidget {
                     return ListTile(
                       onTap: () => _handleNotificationClick(context, ref, item),
                       contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: 4),
-                      tileColor: isUnread ? AppColors.primaryMuted.withOpacity(0.15) : null,
+                      tileColor: isUnread ? theme.colorScheme.primary.withValues(alpha: 0.08) : null,
                       leading: Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isUnread ? AppColors.primary.withOpacity(0.1) : AppColors.border.withOpacity(0.3),
+                          color: isUnread
+                              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                              : theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                         child: Icon(
                           isUnread ? Icons.notifications_active : Icons.notifications_none,
-                          color: isUnread ? AppColors.primary : AppColors.textSecondary,
+                          color: isUnread ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       title: Text(
                         item.title,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
-                          color: isUnread ? AppColors.textPrimary : AppColors.textSecondary,
+                          color: isUnread ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       subtitle: Column(
@@ -150,14 +161,17 @@ class NotificationsSheet extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             item.body,
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: isUnread ? AppColors.textPrimary : AppColors.textSecondary,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isUnread ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             formattedTime,
-                            style: AppTextStyles.caption,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -165,9 +179,9 @@ class NotificationsSheet extends ConsumerWidget {
                           ? Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.primary,
+                                color: theme.colorScheme.primary,
                               ),
                             )
                           : null,

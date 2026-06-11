@@ -10,7 +10,7 @@ class DuesHeroCard extends StatelessWidget {
   const DuesHeroCard({
     super.key,
     required this.amountPaise,
-    required this.label,          // "You owe" vs "Pending from players"
+    required this.label, // "You owe" vs "Pending from players"
     required this.onTap,
     this.ctaLabel = 'Pay',
     this.isAdminView = false,
@@ -18,15 +18,32 @@ class DuesHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final double amountRupees = amountPaise / 100.0;
     // Formats ₹ amount (removes .00 if it's a whole number)
     final String formattedAmount = '₹${amountRupees.toStringAsFixed(amountRupees.truncateToDouble() == amountRupees ? 0 : 2)}';
 
-    final Color backgroundColor = isAdminView ? Colors.blue.shade50 : Colors.red.shade50;
-    final Color borderColor = isAdminView ? Colors.blue.shade200 : Colors.red.shade200;
-    final Color labelColor = isAdminView ? Colors.blue.shade800 : Colors.red.shade800;
-    final Color amountColor = isAdminView ? Colors.blue.shade900 : Colors.red.shade900;
-    final Color buttonColor = isAdminView ? Colors.blue.shade700 : Colors.red.shade600;
+    final Color backgroundColor = isAdminView
+        ? theme.colorScheme.primary.withValues(alpha: 0.08)
+        : theme.colorScheme.error.withValues(alpha: 0.08);
+
+    final Color borderColor = isAdminView
+        ? theme.colorScheme.primary.withValues(alpha: 0.3)
+        : theme.colorScheme.error.withValues(alpha: 0.3);
+
+    final Color labelColor = isAdminView
+        ? theme.colorScheme.primary
+        : theme.colorScheme.error;
+
+    final Color amountColor = theme.colorScheme.onSurface;
+
+    final Color buttonColor = isAdminView
+        ? theme.colorScheme.primary
+        : theme.colorScheme.error;
+
+    final Color buttonTextColor = isAdminView
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onError;
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -44,12 +61,18 @@ class DuesHeroCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 14.0, color: labelColor, fontWeight: FontWeight.w500),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: labelColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8.0),
                 Text(
                   formattedAmount,
-                  style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold, color: amountColor),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: amountColor,
+                  ),
                 ),
               ],
             ),
@@ -57,7 +80,7 @@ class DuesHeroCard extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: buttonColor,
-              foregroundColor: Colors.white,
+              foregroundColor: buttonTextColor,
               elevation: 0,
             ),
             onPressed: onTap,

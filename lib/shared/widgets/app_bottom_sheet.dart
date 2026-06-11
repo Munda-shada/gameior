@@ -6,7 +6,7 @@ Future<T?> showAppBottomSheet<T>({
   String? title,
   bool isDismissible = true,
   bool isScrollControlled = true,
-  double initialChildSizeRatio = 0.5,  // 0.0 to 1.0
+  double initialChildSizeRatio = 0.5, // 0.0 to 1.0
   double maxChildSizeRatio = 0.92,
 }) {
   return showModalBottomSheet<T>(
@@ -41,10 +41,12 @@ class AppBottomSheetContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
       ),
       child: Column(
         children: [
@@ -54,7 +56,7 @@ class AppBottomSheetContainer extends StatelessWidget {
             height: 4.0,
             width: 40.0,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: theme.colorScheme.outlineVariant,
               borderRadius: BorderRadius.circular(2.0),
             ),
           ),
@@ -62,7 +64,9 @@ class AppBottomSheetContainer extends StatelessWidget {
             const SizedBox(height: 16.0),
             Text(
               title!,
-              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
           const SizedBox(height: 16.0),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 
@@ -34,6 +32,8 @@ class BottomCtaPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (gameStatus != 'upcoming') return const SizedBox.shrink();
 
+    final theme = Theme.of(context);
+
     final myDue = dues.firstWhere(
       (d) => d['player_id'] == currentUserId && d['status'] != 'paid',
       orElse: () => null,
@@ -43,14 +43,17 @@ class BottomCtaPanel extends StatelessWidget {
     if (isRsvpClosed) {
       return Container(
         width: double.infinity,
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         padding: const EdgeInsets.all(AppSpacing.base),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline, color: AppColors.textDisabled),
-            SizedBox(width: AppSpacing.sm),
-            Text('RSVP window is closed', style: AppTextStyles.bodyMedium),
+            Icon(Icons.lock_outline, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'RSVP window is closed',
+              style: theme.textTheme.bodyMedium,
+            ),
           ],
         ),
       );
@@ -65,21 +68,24 @@ class BottomCtaPanel extends StatelessWidget {
         if (dueStatus == 'pending_verification') {
           return Container(
             width: double.infinity,
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             padding: const EdgeInsets.all(AppSpacing.base),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.hourglass_empty, color: AppColors.waitlist),
-                SizedBox(width: AppSpacing.sm),
-                Text('Payment pending verification...', style: AppTextStyles.bodyMedium),
+                Icon(Icons.hourglass_empty, color: theme.colorScheme.tertiary),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Payment pending verification...',
+                  style: theme.textTheme.bodyMedium,
+                ),
               ],
             ),
           );
         }
 
         return Container(
-          color: AppColors.surface,
+          color: theme.colorScheme.surfaceContainer,
           padding: const EdgeInsets.all(AppSpacing.base),
           child: AppButton(
             label: 'Complete Your Payment (₹${(amountPaise / 100.0).toStringAsFixed(0)})',
@@ -90,14 +96,17 @@ class BottomCtaPanel extends StatelessWidget {
 
       return Container(
         width: double.infinity,
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         padding: const EdgeInsets.all(AppSpacing.base),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, color: AppColors.primary),
-            SizedBox(width: AppSpacing.sm),
-            Text('You\'re confirmed for this session!', style: AppTextStyles.bodyMedium),
+            Icon(Icons.check_circle_outline, color: theme.colorScheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'You\'re confirmed for this session!',
+              style: theme.textTheme.bodyMedium,
+            ),
           ],
         ),
       );
@@ -107,14 +116,17 @@ class BottomCtaPanel extends StatelessWidget {
     if (myStatus == RsvpStatus.waitlist) {
       return Container(
         width: double.infinity,
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         padding: const EdgeInsets.all(AppSpacing.base),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.hourglass_empty, color: AppColors.waitlist),
-            SizedBox(width: AppSpacing.sm),
-            Text('You\'re on the waitlist for this session', style: AppTextStyles.bodyMedium),
+            Icon(Icons.hourglass_empty, color: theme.colorScheme.tertiary),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'You\'re on the waitlist for this session',
+              style: theme.textTheme.bodyMedium,
+            ),
           ],
         ),
       );
@@ -123,7 +135,7 @@ class BottomCtaPanel extends StatelessWidget {
     // Default Join CTA
     if (paymentModel == 'prepaid') {
       return Container(
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         padding: const EdgeInsets.all(AppSpacing.base),
         child: AppButton(
           label: 'Join Game & Pay',
@@ -132,7 +144,7 @@ class BottomCtaPanel extends StatelessWidget {
       );
     } else if (paymentModel == 'postpaid') {
       return Container(
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         padding: const EdgeInsets.all(AppSpacing.base),
         child: AppButton(
           label: 'Join Game',

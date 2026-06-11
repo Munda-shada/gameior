@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/sessions/widgets/rsvp_buttons.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
@@ -24,6 +22,8 @@ class RsvpSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -31,9 +31,9 @@ class RsvpSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -47,7 +47,10 @@ class RsvpSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'RSVP Deadline: $deadlineStr',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.destructive, fontStyle: FontStyle.italic),
+                  style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+                    color: theme.colorScheme.error,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ],

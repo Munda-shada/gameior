@@ -11,3 +11,14 @@ const Map<SportType, IconData> sportIcons = {
   SportType.pickleball: Icons.sports_tennis,
   SportType.other:      Icons.sports,
 };
+
+const Map<SportType, String> sportEmojis = {
+  SportType.badminton: '🏸',
+  SportType.football: '⚽',
+  SportType.cricket: '🏏',
+  SportType.basketball: '🏀',
+  SportType.tennis: '🎾',
+  SportType.volleyball: '🏐',
+  SportType.pickleball: '🏓',
+  SportType.other: '🏆',
+};

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 
 class CostBreakdownEditor extends StatelessWidget {
@@ -21,6 +20,8 @@ class CostBreakdownEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         ...costItems.asMap().entries.map((entry) {
@@ -60,7 +61,7 @@ class CostBreakdownEditor extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.remove_circle_outline, color: AppColors.destructive),
+                  icon: Icon(Icons.remove_circle_outline, color: theme.colorScheme.error),
                   onPressed: () => onRemoveItem(idx),
                 ),
               ],

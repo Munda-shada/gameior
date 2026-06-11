@@ -5,9 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/constants/app_constants.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -190,6 +188,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
         ),
       ),
       data: (game) {
+        final theme = Theme.of(context);
         if (!_initialized) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -227,7 +226,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
         final perHeadRupees = perHeadPaise / 100.0;
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: theme.colorScheme.surface,
           appBar: AppBar(
             title: Text(isCompleted ? 'Edit Game Completion' : 'Complete Game Session'),
           ),
@@ -243,17 +242,17 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
                         margin: const EdgeInsets.only(bottom: AppSpacing.base),
                         padding: const EdgeInsets.all(AppSpacing.base),
                         decoration: BoxDecoration(
-                          color: AppColors.border,
+                          color: theme.colorScheme.outlineVariant,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.lock_outline, color: AppColors.textDisabled),
+                            Icon(Icons.lock_outline, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 "This game's completion is locked because all dues have been settled.",
-                                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                               ),
                             ),
                           ],
@@ -264,18 +263,21 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
                         margin: const EdgeInsets.only(bottom: AppSpacing.base),
                         padding: const EdgeInsets.all(AppSpacing.base),
                         decoration: BoxDecoration(
-                          color: AppColors.waitlistMuted,
+                          color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(color: AppColors.waitlist.withOpacity(0.5)),
+                          border: Border.all(color: theme.colorScheme.tertiary.withValues(alpha: 0.5)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.warning_amber_rounded, color: AppColors.waitlist),
+                            Icon(Icons.warning_amber_rounded, color: theme.colorScheme.tertiary),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 "Unpaid dues will be recalculated based on new values.",
-                                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.waitlist, fontWeight: FontWeight.bold),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.tertiary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -369,7 +371,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
               // Bottom CTA
               if (!allDuesSettled)
                 Container(
-                  color: AppColors.surface,
+                  color: theme.colorScheme.surfaceContainer,
                   padding: const EdgeInsets.all(AppSpacing.base),
                   child: SafeArea(
                     top: false,

@@ -14,4 +14,8 @@ abstract class AppConstants {
   static const int feedUpcomingGamesLimit  = 5;
   static const int pastGamesInitialLimit   = 3;
   static const int pastGamesLoadMoreStep   = 5;
+
+  static const String helpCentreUrl        = 'https://gameior.com/help';
+  static const String termsOfServiceUrl    = 'https://gameior.com/terms';
+  static const String privacyPolicyUrl     = 'https://gameior.com/privacy';
 }

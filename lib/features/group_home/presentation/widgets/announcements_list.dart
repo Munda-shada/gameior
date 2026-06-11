@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_home/application/group_home_providers.dart';
 import 'package:gameior/shared/widgets/app_dialog.dart';
 import 'package:gameior/shared/widgets/app_error_state.dart';
@@ -52,6 +50,7 @@ class AnnouncementsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final announcementsAsync = ref.watch(groupAnnouncementsProvider(groupId));
 
     return Column(
@@ -87,14 +86,18 @@ class AnnouncementsList extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSpacing.base),
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                  ),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
                     'No announcements posted yet',
-                    style: AppTextStyles.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               );
@@ -113,9 +116,11 @@ class AnnouncementsList extends ConsumerWidget {
                 return Container(
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.base),
@@ -127,8 +132,8 @@ class AnnouncementsList extends ConsumerWidget {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: AppColors.background,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Text(emoji, style: const TextStyle(fontSize: 16)),
@@ -138,30 +143,59 @@ class AnnouncementsList extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(senderName, style: AppTextStyles.labelLarge),
-                                  Text(formattedTime, style: AppTextStyles.caption),
+                                  Text(
+                                    senderName,
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    formattedTime,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                             if (isAdmin)
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, color: AppColors.destructive, size: 20),
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: theme.colorScheme.error,
+                                  size: 20,
+                                ),
                                 onPressed: () => _deleteAnnouncement(context, ref, item['id'] as String),
                               ),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        Text(message, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
+                        Text(
+                          message,
+                          style: theme.textTheme.bodyMedium,
+                        ),
                         if (linkedGameId != null && linkedGameId.isNotEmpty) ...[
                           const SizedBox(height: AppSpacing.sm),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: ActionChip(
-                              avatar: const Icon(Icons.calendar_month, size: 14, color: AppColors.primary),
-                              label: const Text('View Game Session', style: TextStyle(fontSize: 12)),
+                              avatar: Icon(
+                                Icons.calendar_month,
+                                size: 14,
+                                color: theme.colorScheme.primary,
+                              ),
+                              label: Text(
+                                'View Game Session',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               onPressed: () => context.push('/group/$groupId/game/$linkedGameId'),
-                              backgroundColor: AppColors.primaryMuted,
-                              side: BorderSide.none,
+                              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                              side: BorderSide(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(AppRadius.sm),
                               ),

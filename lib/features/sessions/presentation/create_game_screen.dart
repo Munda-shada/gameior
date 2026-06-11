@@ -7,7 +7,6 @@ import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/constants/app_constants.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
@@ -409,6 +408,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -422,7 +422,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
     final rsvpTimeStr = _rsvpDeadlineTime != null ? _rsvpDeadlineTime!.format(context) : 'Select Time';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(widget.editGameId != null ? 'Edit Game Session' : 'Schedule New Game'),
       ),

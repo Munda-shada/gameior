@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
 class RosterSection extends StatelessWidget {
@@ -18,6 +16,8 @@ class RosterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -25,18 +25,21 @@ class RosterSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (confirmedPlayers.isEmpty)
-                const Center(
+                Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                    child: Text('No players confirmed yet.', style: AppTextStyles.bodyMedium),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    child: Text(
+                      'No players confirmed yet.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
                 )
               else
@@ -56,12 +59,15 @@ class RosterSection extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Row(
                       children: [
-                        Text(emoji, style: const TextStyle(fontSize: 20)),
+                        Text(
+                          emoji,
+                          style: theme.textTheme.headlineSmall,
+                        ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
                             '$name$guestLabel$playingLabel',
-                            style: AppTextStyles.bodyLarge,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ),
                       ],

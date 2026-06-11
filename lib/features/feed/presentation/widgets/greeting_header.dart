@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
+import 'package:gameior/shared/widgets/notification_bell.dart';
 
 class GreetingHeader extends StatelessWidget {
   final AsyncValue<dynamic> profileAsync;
@@ -16,8 +15,10 @@ class GreetingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      color: AppColors.surface,
+      color: theme.colorScheme.surface,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + AppSpacing.base,
         left: AppSpacing.base,
@@ -26,7 +27,7 @@ class GreetingHeader extends StatelessWidget {
       ),
       child: profileAsync.when(
         loading: () => const SizedBox(height: 56),
-        error: (_, __) => const SizedBox(height: 56),
+        error: (error, stackTrace) => const SizedBox(height: 56),
         data: (profile) {
           final name = profile?.displayName ?? '';
           final emoji = profile?.emoji ?? '🏸';
@@ -39,10 +40,10 @@ class GreetingHeader extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryMuted,
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -57,19 +58,22 @@ class GreetingHeader extends StatelessWidget {
                   children: [
                     Text(
                       greeting,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Text(
                       name.isEmpty ? 'Welcome back!' : name,
-                      style: AppTextStyles.headlineMedium,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              const NotificationBell(),
             ],
           );
         },
