@@ -52,33 +52,18 @@ class PaymentsRepository {
   /// Reject a UTR submission — reverts to unpaid
   Future<void> rejectDue(String dueId) async {
     final callerId = _client.auth.currentUser!.id;
-    try {
-      // 1. Try with RPC increment
-      await _client.from('payment_dues').update({
-        'status':           'unpaid',
-        'utr_reference':    null,
-        'submitted_at':     null,
-        'verified_by':      callerId,
-        'rejection_count':  _client.rpc('increment', params: {
-          'table': 'payment_dues', 'field': 'rejection_count', 'id': dueId
-        }),
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', dueId)
-        .eq('payment_owner_id', callerId);
-    } catch (e) {
-      // 2. Fallback: Fetch current rejection_count, increment locally, and update
-      final due = await _client.from('payment_dues').select('rejection_count').eq('id', dueId).single();
-      final currentRejections = (due['rejection_count'] as num?)?.toInt() ?? 0;
-      await _client.from('payment_dues').update({
-        'status':           'unpaid',
-        'utr_reference':    null,
-        'submitted_at':     null,
-        'verified_by':      callerId,
-        'rejection_count':  currentRejections + 1,
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', dueId)
-        .eq('payment_owner_id', callerId);
-    }
+    // Fetch current rejection_count, increment locally, and update
+    final due = await _client.from('payment_dues').select('rejection_count').eq('id', dueId).single();
+    final currentRejections = (due['rejection_count'] as num?)?.toInt() ?? 0;
+    await _client.from('payment_dues').update({
+      'status':           'unpaid',
+      'utr_reference':    null,
+      'submitted_at':     null,
+      'verified_by':      callerId,
+      'rejection_count':  currentRejections + 1,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', dueId)
+      .eq('payment_owner_id', callerId);
   }
 
   /// Mark due as paid manually (admin override, no UTR needed)
@@ -163,5 +148,39 @@ class PaymentsRepository {
         .eq('player_id', userId)
         .eq('status', 'unpaid');
     }
+  }
+
+  /// Mark all outstanding dues for a player in a group as paid (admin override)
+  Future<void> markAllDuesPaid({
+    required String groupId,
+    required String userId,
+  }) async {
+    final callerId = _client.auth.currentUser!.id;
+    await _client
+        .from('payment_dues')
+        .update({
+          'status': 'paid',
+          'verified_at': DateTime.now().toUtc().toIso8601String(),
+          'verified_by': callerId,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('group_id', groupId)
+        .eq('player_id', userId)
+        .neq('status', 'paid')
+        .eq('payment_owner_id', callerId);
+  }
+
+  /// Remind dues for a player or all players in a group via remind_dues edge function
+  Future<void> remindDues({
+    required String groupId,
+    String? userId,
+  }) async {
+    await _client.functions.invoke(
+      'remind_dues',
+      body: {
+        'groupId': groupId,
+        if (userId != null) 'userId': userId,
+      },
+    );
   }
 }

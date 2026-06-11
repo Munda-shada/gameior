@@ -274,7 +274,7 @@ class _AdminDuesByGameProviderElement
   String get groupId => (origin as AdminDuesByGameProvider).groupId;
 }
 
-String _$adminDuesNotifierHash() => r'a65d81b673ce071e1d372d4665b58e0322d505c9';
+String _$adminDuesNotifierHash() => r'c7d815f0bbfea5275ac6bdcd1fce3fc5428917ba';
 
 abstract class _$AdminDuesNotifier
     extends BuildlessAutoDisposeAsyncNotifier<List<PaymentDue>> {
@@ -555,6 +555,139 @@ class _MyDuesNotifierProviderElement
 
   @override
   String get groupId => (origin as MyDuesNotifierProvider).groupId;
+}
+
+String _$paymentsPlayerFilterHash() =>
+    r'8f2ce89f6dae99ba7ae2682cc1d34604f5046bf5';
+
+abstract class _$PaymentsPlayerFilter
+    extends BuildlessAutoDisposeNotifier<String?> {
+  late final String groupId;
+
+  String? build(String groupId);
+}
+
+/// See also [PaymentsPlayerFilter].
+@ProviderFor(PaymentsPlayerFilter)
+const paymentsPlayerFilterProvider = PaymentsPlayerFilterFamily();
+
+/// See also [PaymentsPlayerFilter].
+class PaymentsPlayerFilterFamily extends Family<String?> {
+  /// See also [PaymentsPlayerFilter].
+  const PaymentsPlayerFilterFamily();
+
+  /// See also [PaymentsPlayerFilter].
+  PaymentsPlayerFilterProvider call(String groupId) {
+    return PaymentsPlayerFilterProvider(groupId);
+  }
+
+  @override
+  PaymentsPlayerFilterProvider getProviderOverride(
+    covariant PaymentsPlayerFilterProvider provider,
+  ) {
+    return call(provider.groupId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'paymentsPlayerFilterProvider';
+}
+
+/// See also [PaymentsPlayerFilter].
+class PaymentsPlayerFilterProvider
+    extends AutoDisposeNotifierProviderImpl<PaymentsPlayerFilter, String?> {
+  /// See also [PaymentsPlayerFilter].
+  PaymentsPlayerFilterProvider(String groupId)
+    : this._internal(
+        () => PaymentsPlayerFilter()..groupId = groupId,
+        from: paymentsPlayerFilterProvider,
+        name: r'paymentsPlayerFilterProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$paymentsPlayerFilterHash,
+        dependencies: PaymentsPlayerFilterFamily._dependencies,
+        allTransitiveDependencies:
+            PaymentsPlayerFilterFamily._allTransitiveDependencies,
+        groupId: groupId,
+      );
+
+  PaymentsPlayerFilterProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupId,
+  }) : super.internal();
+
+  final String groupId;
+
+  @override
+  String? runNotifierBuild(covariant PaymentsPlayerFilter notifier) {
+    return notifier.build(groupId);
+  }
+
+  @override
+  Override overrideWith(PaymentsPlayerFilter Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: PaymentsPlayerFilterProvider._internal(
+        () => create()..groupId = groupId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupId: groupId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<PaymentsPlayerFilter, String?>
+  createElement() {
+    return _PaymentsPlayerFilterProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PaymentsPlayerFilterProvider && other.groupId == groupId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin PaymentsPlayerFilterRef on AutoDisposeNotifierProviderRef<String?> {
+  /// The parameter `groupId` of this provider.
+  String get groupId;
+}
+
+class _PaymentsPlayerFilterProviderElement
+    extends AutoDisposeNotifierProviderElement<PaymentsPlayerFilter, String?>
+    with PaymentsPlayerFilterRef {
+  _PaymentsPlayerFilterProviderElement(super.provider);
+
+  @override
+  String get groupId => (origin as PaymentsPlayerFilterProvider).groupId;
 }
 
 // ignore_for_file: type=lint

@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/constants/app_constants.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
-import 'package:gameior/shared/widgets/app_text_field.dart';
-import 'package:gameior/shared/widgets/section_header.dart';
+
+// Split section imports
+import 'package:gameior/features/sessions/presentation/widgets/schedule_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/game_details_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/payment_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/rsvp_settings_section.dart';
 
 class CreateGameScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -56,6 +59,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
 
   // Cost breakdown list
   final List<Map<String, dynamic>> _costItems = []; // label: string, costRupees: double
+  List<String> _allowedSkillLevels = ['all'];
 
   @override
   void initState() {
@@ -149,6 +153,8 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
             'costRupees': (item['amount_paise'] as num) / 100.0,
           });
         }
+        final skillLevelsList = gameRes['allowed_skill_levels'] as List? ?? ['all'];
+        _allowedSkillLevels = List<String>.from(skillLevelsList.map((e) => e.toString()));
       } 
       // 4. Template Mode Pre-fill
       else if (widget.isTemplate) {
@@ -187,6 +193,8 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
               'costRupees': (item['amount_paise'] as num) / 100.0,
             });
           }
+          final skillLevelsList = lastGame['allowed_skill_levels'] as List? ?? ['all'];
+          _allowedSkillLevels = List<String>.from(skillLevelsList.map((e) => e.toString()));
         }
       }
     } catch (e) {
@@ -201,9 +209,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
   void _generateRandomName() {
     final venue = _venueController.text.trim();
     if (venue.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a venue first to generate a random name.')),
-      );
+      showToast(context, 'Please enter a venue first to generate a random name.', isError: true);
       return;
     }
     const adjectives = ['Thunder', 'Epic', 'Fire', 'Lightning', 'Power', 'Supreme', 'Golden', 'Apex'];
@@ -278,9 +284,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
   Future<void> _saveGame() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedDate == null || _selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select match date and time.')),
-      );
+      showToast(context, 'Please select match date and time.', isError: true);
       return;
     }
 
@@ -331,6 +335,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
       'allow_guests': _allowGuests,
       'rsvp_deadline': deadlineDateTime?.toIso8601String(),
       'payment_owner_id': client.auth.currentUser!.id,
+      'allowed_skill_levels': _allowedSkillLevels,
     };
 
     try {
@@ -366,22 +371,40 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
       ref.invalidate(pastGamesProvider(groupId: widget.groupId, limit: AppConstants.pastGamesInitialLimit));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.editGameId != null ? 'Game updated!' : 'Game scheduled successfully!')),
-        );
+        showToast(context, widget.editGameId != null ? 'Game updated!' : 'Game scheduled successfully!');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save game: $e')),
-        );
+        showToast(context, 'Failed to save game: $e', isError: true);
       }
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  void _handleSkillLevelSelected(String value, bool selected) {
+    setState(() {
+      if (value == 'all') {
+        if (selected) {
+          _allowedSkillLevels = ['all'];
+        }
+      } else {
+        if (selected) {
+          _allowedSkillLevels.remove('all');
+          if (!_allowedSkillLevels.contains(value)) {
+            _allowedSkillLevels.add(value);
+          }
+        } else {
+          _allowedSkillLevels.remove(value);
+          if (_allowedSkillLevels.isEmpty) {
+            _allowedSkillLevels = ['all'];
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -411,371 +434,83 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Schedule Details
-              const SectionHeader(title: 'WHEN & WHERE'),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.base),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: _selectDate,
-                            child: InputDecorator(
-                              decoration: const InputDecoration(labelText: 'Match Date'),
-                              child: Text(dateStr, style: AppTextStyles.bodyLarge),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.base),
-                        Expanded(
-                          child: InkWell(
-                            onTap: _selectTime,
-                            child: InputDecorator(
-                              decoration: const InputDecoration(labelText: 'Start Time'),
-                              child: Text(timeStr, style: AppTextStyles.bodyLarge),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _durationOption,
-                            decoration: const InputDecoration(labelText: 'Duration'),
-                            items: const [
-                              DropdownMenuItem(value: '30', child: Text('30 Mins')),
-                              DropdownMenuItem(value: '60', child: Text('1 Hour')),
-                              DropdownMenuItem(value: '90', child: Text('1.5 Hours')),
-                              DropdownMenuItem(value: '120', child: Text('2 Hours')),
-                              DropdownMenuItem(value: '150', child: Text('2.5 Hours')),
-                              DropdownMenuItem(value: '180', child: Text('3 Hours')),
-                              DropdownMenuItem(value: 'Custom', child: Text('Custom duration')),
-                            ],
-                            onChanged: (val) => setState(() => _durationOption = val ?? '90'),
-                          ),
-                        ),
-                        if (_durationOption == 'Custom') ...[
-                          const SizedBox(width: AppSpacing.base),
-                          Expanded(
-                            child: AppTextField(
-                              controller: _customDurationController,
-                              label: 'Duration (mins)',
-                              hint: '100',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            ),
-                          ),
-                        ]
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-                    AppTextField(
-                      controller: _venueController,
-                      label: 'Venue Location Name',
-                      hint: 'Court 4, Sector 5 Arena',
-                      maxLength: 100,
-                      validator: (v) => v == null || v.isEmpty ? 'Venue name is required.' : null,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppTextField(
-                      controller: _mapsController,
-                      label: 'Google Maps Link (Optional)',
-                      hint: 'https://maps.app.goo.gl/...',
-                    ),
-                  ],
-                ),
+              ScheduleSection(
+                onSelectDate: _selectDate,
+                onSelectTime: _selectTime,
+                dateStr: dateStr,
+                timeStr: timeStr,
+                durationOption: _durationOption,
+                onDurationChanged: (val) => setState(() => _durationOption = val ?? '90'),
+                customDurationController: _customDurationController,
+                venueController: _venueController,
+                mapsController: _mapsController,
               ),
               const SizedBox(height: AppSpacing.base),
 
               // 2. Game Metadata
-              const SectionHeader(title: 'GAME DETAILS'),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.base),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<SportType>(
-                      value: _sport,
-                      decoration: const InputDecoration(labelText: 'Sport Type'),
-                      items: SportType.values.map((s) {
-                        return DropdownMenuItem(value: s, child: Text(s.name.toUpperCase()));
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _sport = val);
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppTextField(
-                            controller: _titleController,
-                            label: 'Match Session Title',
-                            hint: 'Sunday Smash Clash',
-                            maxLength: 60,
-                            validator: (v) => v == null || v.isEmpty ? 'Session title is required.' : null,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.auto_awesome),
-                          onPressed: _generateRandomName,
-                          tooltip: 'Generate Random Name',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppTextField(
-                      controller: _descController,
-                      label: 'Description / Notes (Optional)',
-                      hint: 'Bring your own rackets. Brand new shuttles provided.',
-                      maxLength: 300,
-                      maxLines: 2,
-                    ),
-                  ],
-                ),
+              GameDetailsSection(
+                sport: _sport,
+                onSportChanged: (val) {
+                  if (val != null) setState(() => _sport = val);
+                },
+                titleController: _titleController,
+                onGenerateName: _generateRandomName,
+                descController: _descController,
+                allowedSkillLevels: _allowedSkillLevels,
+                onSkillLevelSelected: _handleSkillLevelSelected,
               ),
               const SizedBox(height: AppSpacing.base),
 
               // 3. Payment Rules
-              const SectionHeader(title: 'FEES & UPI SETTINGS'),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.base),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Payment Model', style: AppTextStyles.headlineSmall),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Center(child: Text('PRE-PAID')),
-                            selected: _paymentModel == PaymentModel.prepaid,
-                            selectedColor: AppColors.primary.withOpacity(0.15),
-                            labelStyle: TextStyle(
-                              color: _paymentModel == PaymentModel.prepaid ? AppColors.primaryDark : AppColors.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            onSelected: (selected) {
-                              if (selected) setState(() => _paymentModel = PaymentModel.prepaid);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Center(child: Text('POST-PAID')),
-                            selected: _paymentModel == PaymentModel.postpaid,
-                            selectedColor: AppColors.primary.withOpacity(0.15),
-                            labelStyle: TextStyle(
-                              color: _paymentModel == PaymentModel.postpaid ? AppColors.primaryDark : AppColors.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            onSelected: (selected) {
-                              if (selected) setState(() => _paymentModel = PaymentModel.postpaid);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-                    AppTextField(
-                      controller: _costController,
-                      label: _paymentModel == PaymentModel.prepaid ? 'Cost per person (₹)' : 'Estimated cost per person (₹) (Optional)',
-                      hint: '150',
-                      enabled: !_showCostBreakdown,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      validator: (v) {
-                        if (_paymentModel == PaymentModel.prepaid && (v == null || v.isEmpty)) {
-                          return 'Cost is required for prepaid model.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.base),
-                    AppTextField(
-                      controller: _upiController,
-                      label: 'Organizer UPI ID (for receiving collections)',
-                      hint: 'name@upi',
-                      validator: (v) => v == null || v.isEmpty ? 'UPI ID is required.' : null,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    
-                    // Cost Breakdown Accordion
-                    ExpansionTile(
-                      leading: const Icon(Icons.calculate_outlined, color: AppColors.primary),
-                      title: const Text('Add Cost Breakdown', style: AppTextStyles.headlineSmall),
-                      subtitle: const Text('Sum elements to calculate per head cost', style: AppTextStyles.bodySmall),
-                      initiallyExpanded: _showCostBreakdown,
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          _showCostBreakdown = expanded;
-                          if (expanded) _updateCostFromBreakdown();
-                        });
-                      },
-                      children: [
-                        ..._costItems.asMap().entries.map((entry) {
-                          final idx = entry.key;
-                          final item = entry.value;
-                          final labelController = TextEditingController(text: item['label'] as String);
-                          final valController = TextEditingController(text: (item['costRupees'] as double).toStringAsFixed(0));
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: TextField(
-                                    controller: labelController,
-                                    decoration: const InputDecoration(labelText: 'Item Label', hintText: 'Court fee'),
-                                    onChanged: (val) {
-                                      _costItems[idx]['label'] = val;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: valController,
-                                    decoration: const InputDecoration(labelText: 'Amount (₹)'),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    onChanged: (val) {
-                                      _costItems[idx]['costRupees'] = double.tryParse(val) ?? 0.0;
-                                      _updateCostFromBreakdown();
-                                    },
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: AppColors.destructive),
-                                  onPressed: () {
-                                    setState(() {
-                                      _costItems.removeAt(idx);
-                                      _updateCostFromBreakdown();
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                        if (_costItems.length < 5)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Line Item'),
-                              onPressed: () {
-                                setState(() {
-                                  _costItems.add({'label': '', 'costRupees': 0.0});
-                                });
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
+              PaymentSection(
+                paymentModel: _paymentModel,
+                onPaymentModelChanged: (val) => setState(() => _paymentModel = val),
+                costController: _costController,
+                upiController: _upiController,
+                showCostBreakdown: _showCostBreakdown,
+                onCostBreakdownExpanded: (expanded) {
+                  setState(() {
+                    _showCostBreakdown = expanded;
+                    if (expanded) _updateCostFromBreakdown();
+                  });
+                },
+                costItems: _costItems,
+                onAddCostItem: () {
+                  setState(() {
+                    _costItems.add({'label': '', 'costRupees': 0.0});
+                  });
+                },
+                onRemoveCostItem: (idx) {
+                  setState(() {
+                    _costItems.removeAt(idx);
+                    _updateCostFromBreakdown();
+                  });
+                },
+                onCostItemLabelChanged: (idx, val) {
+                  _costItems[idx]['label'] = val;
+                },
+                onCostItemAmountChanged: (idx, val) {
+                  _costItems[idx]['costRupees'] = val;
+                  _updateCostFromBreakdown();
+                },
               ),
               const SizedBox(height: AppSpacing.base),
 
               // 4. RSVP Rules
-              const SectionHeader(title: 'RSVP LIMITS & DEADLINE'),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.base),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    AppTextField(
-                      controller: _capacityController,
-                      label: 'Maximum Game Capacity',
-                      hint: '20',
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Capacity is required.';
-                        final cap = int.tryParse(v) ?? 0;
-                        if (cap < 2 || cap > 200) return 'Capacity must be between 2 and 200.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    SwitchListTile.adaptive(
-                      title: const Text('Allow Guest RSVPs', style: AppTextStyles.headlineSmall),
-                      subtitle: const Text('Players can add +1 or more extra guests', style: AppTextStyles.bodySmall),
-                      value: _allowGuests,
-                      activeColor: AppColors.primary,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (val) => setState(() => _allowGuests = val),
-                    ),
-                    const Divider(height: AppSpacing.lg),
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('RSVP Deadline (Optional)', style: AppTextStyles.headlineSmall),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: _selectRsvpDeadlineDate,
-                            child: InputDecorator(
-                              decoration: const InputDecoration(labelText: 'Deadline Date'),
-                              child: Text(_rsvpDeadlineDate != null ? rsvpDateStr : 'None', style: AppTextStyles.bodyLarge),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.base),
-                        Expanded(
-                          child: InkWell(
-                            onTap: _selectRsvpDeadlineTime,
-                            child: InputDecorator(
-                              decoration: const InputDecoration(labelText: 'Deadline Time'),
-                              child: Text(_rsvpDeadlineTime != null ? rsvpTimeStr : 'None', style: AppTextStyles.bodyLarge),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_rsvpDeadlineDate != null)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => setState(() {
-                            _rsvpDeadlineDate = null;
-                            _rsvpDeadlineTime = null;
-                          }),
-                          child: const Text('Clear Deadline', style: TextStyle(color: AppColors.destructive)),
-                        ),
-                      ),
-                  ],
-                ),
+              RsvpSettingsSection(
+                capacityController: _capacityController,
+                allowGuests: _allowGuests,
+                onAllowGuestsChanged: (val) => setState(() => _allowGuests = val),
+                rsvpDeadlineDate: _rsvpDeadlineDate,
+                rsvpDeadlineTime: _rsvpDeadlineTime,
+                onSelectRsvpDeadlineDate: _selectRsvpDeadlineDate,
+                onSelectRsvpDeadlineTime: _selectRsvpDeadlineTime,
+                onClearDeadline: () => setState(() {
+                  _rsvpDeadlineDate = null;
+                  _rsvpDeadlineTime = null;
+                }),
+                rsvpDateStr: rsvpDateStr,
+                rsvpTimeStr: rsvpTimeStr,
               ),
               const SizedBox(height: AppSpacing.lg),
 

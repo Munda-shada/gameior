@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/features/members/domain/member_stats.dart';
+import 'package:gameior/features/members/domain/audit_log.dart';
 import 'package:gameior/shared/models/enums.dart';
 
 final membersRepositoryProvider = Provider<MembersRepository>((ref) {
@@ -242,5 +243,22 @@ class MembersRepository {
       joinedAt: joinedAt,
       monthlyData: monthlyData,
     );
+  }
+
+  /// Fetch audit logs for a group
+  Future<List<AuditLog>> fetchAuditLogs(String groupId) async {
+    final response = await _client
+        .from('audit_logs')
+        .select('''
+          *,
+          actor:profiles!actor_id (display_name),
+          target:profiles!target_id (display_name)
+        ''')
+        .eq('group_id', groupId)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((json) => AuditLog.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 }

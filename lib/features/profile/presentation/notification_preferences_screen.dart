@@ -7,6 +7,7 @@ import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
 import 'package:gameior/features/profile/application/signup_provider.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 
 class NotificationPreferencesScreen extends ConsumerStatefulWidget {
   const NotificationPreferencesScreen({super.key});
@@ -55,19 +56,12 @@ class _NotificationPreferencesScreenState extends ConsumerState<NotificationPref
         ref.invalidate(currentUserProvider);
         if (mounted) {
           setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Preferences saved'),
-              duration: Duration(seconds: 1),
-            ),
-          );
+          showToast(context, 'Preferences saved');
         }
       } catch (e) {
         if (mounted) {
           setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save preferences: $e')),
-          );
+          showToast(context, 'Failed to save preferences: $e', isError: true);
         }
       }
     });
@@ -203,7 +197,7 @@ class _NotificationPreferencesScreenState extends ConsumerState<NotificationPref
               ),
               _DeliveryOptionTile(
                 title: 'Quiet Hours',
-                subtitle: 'Pause non-urgent alerts between 11 PM and 7 AM',
+                subtitle: 'Pause non-urgent alerts between 10 PM and 8 AM',
                 value: 'quiet_hours',
                 groupValue: _deliveryTiming,
                 onChanged: (val) {

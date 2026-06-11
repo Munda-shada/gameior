@@ -119,8 +119,8 @@ async function shouldDeliver(userId: string, type: string, supabase: any): Promi
   if (profile.notif_delivery_mode === 'daily_digest') {
     return 'digest';
   } else if (profile.notif_delivery_mode === 'quiet_hours') {
-    // 11 PM to 7 AM quiet hours
-    if (hour >= 23 || hour < 7) {
+    // 10 PM to 8 AM quiet hours
+    if (hour >= 22 || hour < 8) {
       return 'digest';
     }
   }

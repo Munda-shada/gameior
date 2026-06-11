@@ -10,12 +10,7 @@ import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/auth/data/auth_repository.dart';
 import 'package:gameior/shared/widgets/app_dialog.dart';
 import 'package:gameior/features/profile/application/signup_provider.dart';
-
-class Routes {
-  static const profileEdit = '/home/profile/edit';
-  static const profileNotifications = '/home/profile/notifications';
-  static const profileDeleteAccount = '/home/profile/delete-account';
-}
+import 'package:gameior/core/router/route_names.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -86,7 +81,7 @@ class ProfileTab extends ConsumerWidget {
                   style: AppTextStyles.bodyLarge
                       .copyWith(color: AppColors.destructive),
                 ),
-                onTap: () => context.push(Routes.profileDeleteAccount),
+                onTap: () => context.push(Routes.profileDelete),
               ),
             ],
           );

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
-import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
 import 'package:gameior/shared/models/enums.dart';
-import 'package:gameior/shared/widgets/app_button.dart';
-import 'package:gameior/shared/widgets/app_text_field.dart';
-import 'package:gameior/shared/widgets/section_header.dart';
+
+import 'package:gameior/features/sessions/presentation/widgets/cost_summary_card.dart';
+import 'package:gameior/features/sessions/presentation/widgets/guest_adjustment_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/payment_details_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/utr_submission_section.dart';
 
 class GamePaymentScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -85,16 +85,12 @@ class _GamePaymentScreenState extends ConsumerState<GamePaymentScreen> {
         await launchUrl(uri);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No UPI apps found. Please pay manually using the UPI ID.')),
-          );
+          showToast(context, 'No UPI apps found. Please pay manually using the UPI ID.', isError: true);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch UPI app. Please pay manually.')),
-        );
+        showToast(context, 'Could not launch UPI app. Please pay manually.', isError: true);
       }
     }
   }
@@ -130,16 +126,12 @@ class _GamePaymentScreenState extends ConsumerState<GamePaymentScreen> {
       ref.invalidate(upcomingGamesProvider(widget.groupId));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment submitted! Waiting for host verification.')),
-        );
+        showToast(context, 'Payment submitted! Waiting for host verification.');
         context.pop(); // Back to Game Details
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit payment: $e')),
-        );
+        showToast(context, 'Failed to submit payment: $e', isError: true);
       }
     } finally {
       if (mounted) {
@@ -208,184 +200,44 @@ class _GamePaymentScreenState extends ConsumerState<GamePaymentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Cost summary card
-                  const SectionHeader(title: 'COST SUMMARY'),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.base),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildSummaryRow('Base Cost per person', '₹${(costPaise / 100.0).toStringAsFixed(0)}'),
-                        const Divider(height: AppSpacing.lg),
-                        _buildSummaryRow('Attending Slots', '$neededSlots slot${neededSlots > 1 ? 's' : ''}'),
-                        const Divider(height: AppSpacing.lg),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Total Dues Payable', style: AppTextStyles.headlineSmall),
-                            Text(
-                              '₹${(totalCostPaise / 100.0).toStringAsFixed(0)}',
-                              style: AppTextStyles.displayMedium.copyWith(color: AppColors.primaryDark),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  CostSummaryCard(
+                    costPaise: costPaise,
+                    neededSlots: neededSlots,
+                    totalCostPaise: totalCostPaise,
                   ),
                   const SizedBox(height: AppSpacing.base),
 
-                  // 2. Guest stepper adjustments (if allowed)
                   if (allowGuests) ...[
-                    const SectionHeader(title: 'ADJUST SLOTS'),
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.base),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        children: [
-                          CheckboxListTile.adaptive(
-                            title: const Text('I am playing', style: AppTextStyles.headlineSmall),
-                            value: _userIsPlaying,
-                            activeColor: AppColors.primary,
-                            contentPadding: EdgeInsets.zero,
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _userIsPlaying = val);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Extra Guests', style: AppTextStyles.headlineSmall),
-                                  Text('Add friends to play along', style: AppTextStyles.bodySmall),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, color: AppColors.textSecondary),
-                                    onPressed: _guestCount > 0 ? () => setState(() => _guestCount--) : null,
-                                  ),
-                                  Text('$_guestCount', style: AppTextStyles.headlineMedium),
-                                  IconButton(
-                                    icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
-                                    onPressed: _guestCount < 5 ? () => setState(() => _guestCount++) : null,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          if (exceedsSpots) ...[
-                            const SizedBox(height: AppSpacing.base),
-                            Text(
-                              'Warning: Session is full. Submitting payment will request slot verification from the organizer.',
-                              style: AppTextStyles.bodySmall.copyWith(color: AppColors.destructive, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ],
-                      ),
+                    GuestAdjustmentSection(
+                      userIsPlaying: _userIsPlaying,
+                      onUserIsPlayingChanged: (val) {
+                        if (val != null) {
+                          setState(() => _userIsPlaying = val);
+                        }
+                      },
+                      guestCount: _guestCount,
+                      onDecrementGuests: _guestCount > 0 ? () => setState(() => _guestCount--) : () {},
+                      onIncrementGuests: _guestCount < 5 ? () => setState(() => _guestCount++) : () {},
+                      exceedsSpots: exceedsSpots,
                     ),
                     const SizedBox(height: AppSpacing.base),
                   ],
 
-                  // 3. Payment Instructions & UPI launcher
-                  const SectionHeader(title: 'PAYMENT DETAILS'),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.base),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Scan or transfer to organizer\'s UPI ID below:',
-                          style: AppTextStyles.bodyMedium,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        SelectableText(
-                          upiId,
-                          style: AppTextStyles.displayMedium.copyWith(color: AppColors.primary, fontSize: 22),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.open_in_new),
-                              label: const Text('Open UPI App'),
-                              onPressed: () => _launchUpiApp(upiId, totalCostPaise, title),
-                            ),
-                            const SizedBox(width: AppSpacing.base),
-                            IconButton(
-                              icon: const Icon(Icons.copy, color: AppColors.textSecondary),
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: upiId));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('UPI ID copied to clipboard!')),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  PaymentDetailsSection(
+                    upiId: upiId,
+                    onOpenUpiApp: () => _launchUpiApp(upiId, totalCostPaise, title),
+                    onCopied: () => showToast(context, 'UPI ID copied to clipboard!'),
                   ),
                   const SizedBox(height: AppSpacing.base),
 
-                  // 4. UTR confirmation input
-                  const SectionHeader(title: 'UTR TRANSACTION ID'),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.base),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Column(
-                      children: [
-                        AppTextField(
-                          controller: _utrController,
-                          label: '12-digit UPI Transaction Ref (UTR)',
-                          hint: 'E.g. 408712345678',
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(12),
-                          ],
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'UTR number is required to confirm payment.';
-                            if (v.length != 12) return 'UTR must be exactly 12 digits.';
-                            if (!RegExp(r'^[0-9]{12}$').hasMatch(v)) return 'UTR must be numbers only.';
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: AppSpacing.base),
-                        AppButton(
-                          label: 'Submit Payment & Join',
-                          isLoading: _isSubmitting,
-                          onPressed: () => _submitPayment(
-                            dueId,
-                            totalCostPaise,
-                            game['payment_owner_id'] as String,
-                            game['group_id'] as String,
-                          ),
-                        ),
-                      ],
+                  UtrSubmissionSection(
+                    controller: _utrController,
+                    isLoading: _isSubmitting,
+                    onSubmit: () => _submitPayment(
+                      dueId,
+                      totalCostPaise,
+                      game['payment_owner_id'] as String,
+                      game['group_id'] as String,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
@@ -395,16 +247,6 @@ class _GamePaymentScreenState extends ConsumerState<GamePaymentScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTextStyles.bodyMedium),
-        Text(value, style: AppTextStyles.headlineSmall),
-      ],
     );
   }
 }

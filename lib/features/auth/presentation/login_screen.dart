@@ -4,7 +4,7 @@ import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
-import 'package:gameior/shared/widgets/toast.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 import 'package:gameior/features/auth/application/auth_provider.dart';
 
 class LoginScreen extends ConsumerWidget {

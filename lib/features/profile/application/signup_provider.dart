@@ -6,6 +6,7 @@ import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/core/theme/app_text_styles.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 import 'package:gameior/shared/widgets/app_bottom_sheet.dart';
@@ -39,15 +40,6 @@ class SignupNotifier extends _$SignupNotifier {
       ref.invalidate(currentUserProvider);
     });
   }
-}
-
-void showToast(BuildContext context, String message, {bool isError = false}) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: isError ? Colors.red : Colors.green,
-    ),
-  );
 }
 
 class EmojiPickerGrid extends StatelessWidget {

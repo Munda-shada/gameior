@@ -162,6 +162,126 @@ class _MemberStatsProviderElement
   String get userId => (origin as MemberStatsProvider).userId;
 }
 
+String _$groupAuditLogsHash() => r'171e60a5ed1af9c923a2ccc36cd0c219643a5cc3';
+
+/// See also [groupAuditLogs].
+@ProviderFor(groupAuditLogs)
+const groupAuditLogsProvider = GroupAuditLogsFamily();
+
+/// See also [groupAuditLogs].
+class GroupAuditLogsFamily extends Family<AsyncValue<List<AuditLog>>> {
+  /// See also [groupAuditLogs].
+  const GroupAuditLogsFamily();
+
+  /// See also [groupAuditLogs].
+  GroupAuditLogsProvider call(String groupId) {
+    return GroupAuditLogsProvider(groupId);
+  }
+
+  @override
+  GroupAuditLogsProvider getProviderOverride(
+    covariant GroupAuditLogsProvider provider,
+  ) {
+    return call(provider.groupId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'groupAuditLogsProvider';
+}
+
+/// See also [groupAuditLogs].
+class GroupAuditLogsProvider extends AutoDisposeFutureProvider<List<AuditLog>> {
+  /// See also [groupAuditLogs].
+  GroupAuditLogsProvider(String groupId)
+    : this._internal(
+        (ref) => groupAuditLogs(ref as GroupAuditLogsRef, groupId),
+        from: groupAuditLogsProvider,
+        name: r'groupAuditLogsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$groupAuditLogsHash,
+        dependencies: GroupAuditLogsFamily._dependencies,
+        allTransitiveDependencies:
+            GroupAuditLogsFamily._allTransitiveDependencies,
+        groupId: groupId,
+      );
+
+  GroupAuditLogsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupId,
+  }) : super.internal();
+
+  final String groupId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<AuditLog>> Function(GroupAuditLogsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GroupAuditLogsProvider._internal(
+        (ref) => create(ref as GroupAuditLogsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupId: groupId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<AuditLog>> createElement() {
+    return _GroupAuditLogsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GroupAuditLogsProvider && other.groupId == groupId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GroupAuditLogsRef on AutoDisposeFutureProviderRef<List<AuditLog>> {
+  /// The parameter `groupId` of this provider.
+  String get groupId;
+}
+
+class _GroupAuditLogsProviderElement
+    extends AutoDisposeFutureProviderElement<List<AuditLog>>
+    with GroupAuditLogsRef {
+  _GroupAuditLogsProviderElement(super.provider);
+
+  @override
+  String get groupId => (origin as GroupAuditLogsProvider).groupId;
+}
+
 String _$groupMembersHash() => r'54275bb2b78a48c02ceeb13da52f8d25b2c3f938';
 
 abstract class _$GroupMembers

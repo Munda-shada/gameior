@@ -32,6 +32,8 @@ void handleNotificationTap(RemoteMessage message, Ref ref) {
       router.push('/group/${data['group_id']}?tab=${GroupTab.payments.index}');
     case 'join_request':
       router.push('/group/${data['group_id']}?tab=${GroupTab.members.index}');
+    case 'game_cancelled':
+      router.push('/group/${data['group_id']}?tab=${GroupTab.sessions.index}');
     default:
       router.push('/home/feed');
   }

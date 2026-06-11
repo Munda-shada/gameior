@@ -9,6 +9,7 @@ import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
 import 'package:gameior/shared/widgets/app_bottom_sheet.dart';
 import 'package:gameior/features/profile/application/signup_provider.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -88,20 +89,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ref.invalidate(currentUserProvider);
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully')),
-          );
+          showToast(context, 'Profile updated successfully');
           context.pop();
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update profile: $e'),
-            backgroundColor: AppColors.destructive,
-          ),
-        );
+        showToast(context, 'Failed to update profile: $e', isError: true);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

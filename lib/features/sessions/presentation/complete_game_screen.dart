@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/constants/app_constants.dart';
 import 'package:gameior/core/theme/app_colors.dart';
@@ -12,7 +12,12 @@ import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 import 'package:gameior/shared/widgets/app_error_state.dart';
-import 'package:gameior/shared/widgets/section_header.dart';
+
+// Split widgets imports
+import 'package:gameior/features/sessions/presentation/widgets/game_info_banner.dart';
+import 'package:gameior/features/sessions/presentation/widgets/cost_form_section.dart';
+import 'package:gameior/features/sessions/presentation/widgets/billing_preview_card.dart';
+import 'package:gameior/features/sessions/presentation/widgets/attendance_checklist.dart';
 
 class CompleteGameScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -31,6 +36,15 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
   bool _chargeAllRsvped = false;
   final Set<String> _attendedPlayerIds = {};
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final cached = ref.read(gameDetailProvider(widget.gameId)).valueOrNull;
+    if (cached != null) {
+      _initializeState(cached);
+    }
+  }
 
   @override
   void dispose() {
@@ -100,9 +114,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
 
     final totalCostDouble = double.tryParse(_costController.text) ?? 0.0;
     if (totalCostDouble <= 0.0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid total cost.')),
-      );
+      showToast(context, 'Please enter a valid total cost.', isError: true);
       return;
     }
 
@@ -110,9 +122,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
 
     // Attended list can't be empty if chargeAllRsvped is false
     if (!_chargeAllRsvped && _attendedPlayerIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one attendee to bill.')),
-      );
+      showToast(context, 'Please select at least one attendee to bill.', isError: true);
       return;
     }
 
@@ -147,22 +157,17 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
       ref.invalidate(upcomingGamesProvider(widget.groupId));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isCompleted
-                  ? 'Game completion updated successfully!'
-                  : 'Game completed. Dues sent to players.',
-            ),
-          ),
+        showToast(
+          context,
+          isCompleted
+              ? 'Game completion updated successfully!'
+              : 'Game completed. Dues sent to players.',
         );
         context.pop(); // Go back to Game Detail
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Submission failed: $e')),
-        );
+        showToast(context, 'Submission failed: $e', isError: true);
       }
     } finally {
       if (mounted) {
@@ -186,7 +191,14 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
       ),
       data: (game) {
         if (!_initialized) {
-          _initializeState(game);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _initializeState(game);
+              });
+            }
+          });
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         final status = game['status'] as String? ?? 'upcoming';
@@ -254,7 +266,7 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.waitlistMuted,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(color: AppColors.waitlist.withValues(alpha: 0.5)),
+                          border: Border.all(color: AppColors.waitlist.withOpacity(0.5)),
                         ),
                         child: Row(
                           children: [
@@ -270,331 +282,84 @@ class _CompleteGameScreenState extends ConsumerState<CompleteGameScreen> {
                         ),
                       ),
 
-                    // Game info card
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.base),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            game['sport'].toString().toUpperCase(),
-                            style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(title, style: AppTextStyles.headlineLarge),
-                          const SizedBox(height: AppSpacing.xs),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(formattedTime, style: AppTextStyles.bodySmall),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: AppSpacing.xs),
-                              Expanded(
-                                child: Text(
-                                  venue,
-                                  style: AppTextStyles.bodySmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                    GameInfoBanner(
+                      sport: game['sport'].toString(),
+                      title: title,
+                      formattedTime: formattedTime,
+                      venue: venue,
                     ),
                     const SizedBox(height: AppSpacing.base),
 
-                    // Cost Section Header
-                    const SectionHeader(title: 'EXPENSES & BILLING MODEL'),
-
-                    // Cost card
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.base),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: _costController,
-                            enabled: !allDuesSettled,
-                            decoration: const InputDecoration(
-                              labelText: 'Total Cost (₹)',
-                              prefixText: '₹ ',
-                              hintText: '0.00',
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                            ],
-                            onChanged: (val) {
-                              setState(() {});
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.base),
-
-                          // Cost items accordion
-                          ExpansionTile(
-                            leading: const Icon(Icons.calculate_outlined, color: AppColors.primary),
-                            title: const Text('Add Cost Breakdown', style: AppTextStyles.headlineSmall),
-                            subtitle: const Text('Sum elements to calculate total cost', style: AppTextStyles.bodySmall),
-                            initiallyExpanded: _showCostBreakdown,
-                            onExpansionChanged: allDuesSettled ? null : (expanded) {
-                              setState(() {
-                                _showCostBreakdown = expanded;
-                                if (expanded) _updateCostFromBreakdown();
-                              });
-                            },
-                            children: [
-                              ..._costItems.asMap().entries.map((entry) {
-                                final idx = entry.key;
-                                final item = entry.value;
-                                final labelController = TextEditingController(text: item['label'] as String);
-                                final valController = TextEditingController(text: (item['costRupees'] as double).toStringAsFixed(0));
-
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: TextField(
-                                          controller: labelController,
-                                          enabled: !allDuesSettled,
-                                          decoration: const InputDecoration(labelText: 'Item Label', hintText: 'Court fee'),
-                                          onChanged: (val) {
-                                            _costItems[idx]['label'] = val;
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      Expanded(
-                                        flex: 2,
-                                        child: TextField(
-                                          controller: valController,
-                                          enabled: !allDuesSettled,
-                                          decoration: const InputDecoration(labelText: 'Amount (₹)'),
-                                          keyboardType: TextInputType.number,
-                                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                          onChanged: (val) {
-                                            _costItems[idx]['costRupees'] = double.tryParse(val) ?? 0.0;
-                                            _updateCostFromBreakdown();
-                                          },
-                                        ),
-                                      ),
-                                      if (!allDuesSettled)
-                                        IconButton(
-                                          icon: const Icon(Icons.remove_circle_outline, color: AppColors.destructive),
-                                          onPressed: () {
-                                            setState(() {
-                                              _costItems.removeAt(idx);
-                                              _updateCostFromBreakdown();
-                                            });
-                                          },
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                              if (!allDuesSettled && _costItems.length < 5)
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: TextButton.icon(
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('Add Line Item'),
-                                    onPressed: () {
-                                      setState(() {
-                                        _costItems.add({'label': '', 'costRupees': 0.0});
-                                      });
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const Divider(height: AppSpacing.lg),
-
-                          SwitchListTile.adaptive(
-                            activeTrackColor: AppColors.primary,
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Charge all RSVPed players', style: AppTextStyles.headlineSmall),
-                            subtitle: const Text('If off, only checked attendees below will be charged', style: AppTextStyles.bodySmall),
-                            value: _chargeAllRsvped,
-                            onChanged: allDuesSettled
-                                ? null
-                                : (val) {
-                                    setState(() {
-                                      _chargeAllRsvped = val;
-                                    });
-                                  },
-                          ),
-                        ],
-                      ),
+                    CostFormSection(
+                      costController: _costController,
+                      allDuesSettled: allDuesSettled,
+                      showCostBreakdown: _showCostBreakdown,
+                      onCostBreakdownExpanded: (expanded) {
+                        setState(() {
+                          _showCostBreakdown = expanded;
+                          if (expanded) _updateCostFromBreakdown();
+                        });
+                      },
+                      costItems: _costItems,
+                      onAddCostItem: () {
+                        setState(() {
+                          _costItems.add({'label': '', 'costRupees': 0.0});
+                        });
+                      },
+                      onRemoveCostItem: (idx) {
+                        setState(() {
+                          _costItems.removeAt(idx);
+                          _updateCostFromBreakdown();
+                        });
+                      },
+                      onCostItemLabelChanged: (idx, val) {
+                        _costItems[idx]['label'] = val;
+                      },
+                      onCostItemAmountChanged: (idx, val) {
+                        _costItems[idx]['costRupees'] = val;
+                        _updateCostFromBreakdown();
+                      },
+                      chargeAllRsvped: _chargeAllRsvped,
+                      onChargeAllRsvpedChanged: (val) {
+                        setState(() {
+                          _chargeAllRsvped = val;
+                        });
+                      },
                     ),
                     const SizedBox(height: AppSpacing.base),
 
-                    // Live preview billing summary card
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.base),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryMuted,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Per-head Cost:',
-                                style: AppTextStyles.headlineSmall.copyWith(color: AppColors.primaryDark),
-                              ),
-                              Text(
-                                '₹${perHeadRupees.toStringAsFixed(2)}',
-                                style: AppTextStyles.displayLarge.copyWith(color: AppColors.primaryDark),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Divisor:',
-                                style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryDark),
-                              ),
-                              Text(
-                                '$chargedCount players billed',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.primaryDark,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                    BillingPreviewCard(
+                      perHeadRupees: perHeadRupees,
+                      chargedCount: chargedCount,
                     ),
                     const SizedBox(height: AppSpacing.base),
 
-                    // Attendance Checklist section
-                    SectionHeader(
-                      title: _chargeAllRsvped
-                          ? 'ATTENDANCE LIST (ALL RSVPS CHARGED)'
-                          : 'ATTENDANCE SHEET (ONLY CHECKED CHARGED)',
-                    ),
-
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.base),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (eligiblePlayers.isEmpty)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: AppSpacing.base),
-                                child: Text('No players confirmed (YES/Guest) for this session.', style: AppTextStyles.bodyMedium),
-                              ),
-                            )
-                          else ...[
-                            if (!allDuesSettled)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '${_attendedPlayerIds.length} of ${eligiblePlayers.length} attended',
-                                    style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  Row(
-                                    children: [
-                                      TextButton(
-                                        style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(60, 30)),
-                                        onPressed: () {
-                                          setState(() {
-                                            for (var r in eligiblePlayers) {
-                                              _attendedPlayerIds.add(r['user_id'] as String);
-                                            }
-                                          });
-                                        },
-                                        child: const Text('Select All', style: TextStyle(fontSize: 12)),
-                                      ),
-                                      const VerticalDivider(),
-                                      TextButton(
-                                        style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(60, 30)),
-                                        onPressed: () {
-                                          setState(() {
-                                            _attendedPlayerIds.clear();
-                                          });
-                                        },
-                                        child: const Text('Clear All', style: TextStyle(fontSize: 12)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            const Divider(),
-                            ...eligiblePlayers.map((r) {
-                              final profile = r['profiles'] as Map<String, dynamic>? ?? {};
-                              final name = profile['display_name'] as String? ?? 'Player';
-                              final emoji = profile['emoji'] as String? ?? '🏸';
-                              final userId = r['user_id'] as String;
-
-                              final isAttending = _attendedPlayerIds.contains(userId);
-
-                              return CheckboxListTile.adaptive(
-                                activeColor: AppColors.primary,
-                                contentPadding: EdgeInsets.zero,
-                                enabled: !allDuesSettled,
-                                title: Row(
-                                  children: [
-                                    Text(emoji, style: const TextStyle(fontSize: 20)),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Expanded(
-                                      child: Text(
-                                        name,
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          fontWeight: isAttending ? FontWeight.bold : FontWeight.normal,
-                                          color: isAttending ? AppColors.textPrimary : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                value: isAttending,
-                                onChanged: (val) {
-                                  if (val == null) return;
-                                  setState(() {
-                                    if (val) {
-                                      _attendedPlayerIds.add(userId);
-                                    } else {
-                                      _attendedPlayerIds.remove(userId);
-                                    }
-                                  });
-                                },
-                              );
-                            }),
-                          ],
-                        ],
-                      ),
+                    AttendanceChecklist(
+                      chargeAllRsvped: _chargeAllRsvped,
+                      eligiblePlayers: eligiblePlayers,
+                      attendedPlayerIds: _attendedPlayerIds,
+                      allDuesSettled: allDuesSettled,
+                      onAttendanceChanged: (userId, val) {
+                        setState(() {
+                          if (val) {
+                            _attendedPlayerIds.add(userId);
+                          } else {
+                            _attendedPlayerIds.remove(userId);
+                          }
+                        });
+                      },
+                      onSelectAll: () {
+                        setState(() {
+                          for (var r in eligiblePlayers) {
+                            _attendedPlayerIds.add(r['user_id'] as String);
+                          }
+                        });
+                      },
+                      onClearAll: () {
+                        setState(() {
+                          _attendedPlayerIds.clear();
+                        });
+                      },
                     ),
                     const SizedBox(height: AppSpacing.xl),
                   ],

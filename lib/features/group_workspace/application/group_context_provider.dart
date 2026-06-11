@@ -15,6 +15,7 @@ abstract class GroupContext with _$GroupContext {
     required MemberRole myRole,
     required MembershipStatus myStatus,
     required String inviteCode,
+    required bool notificationsEnabled,
   }) = _GroupContext;
 }
 
@@ -59,13 +60,14 @@ Future<GroupContext> groupContext(GroupContextRef ref, String groupId) async {
   // 2. Fetch caller's membership status and role
   final memberRes = await client
       .from('group_members')
-      .select('role, status')
+      .select('role, status, notifications_enabled')
       .eq('group_id', groupId)
       .eq('user_id', userId)
       .single();
   
   final myRole = _parseRole(memberRes['role'] as String);
   final myStatus = _parseStatus(memberRes['status'] as String);
+  final notificationsEnabled = memberRes['notifications_enabled'] as bool? ?? true;
 
   // 3. Fetch group invite code
   var inviteCode = '';
@@ -87,6 +89,7 @@ Future<GroupContext> groupContext(GroupContextRef ref, String groupId) async {
     myRole: myRole,
     myStatus: myStatus,
     inviteCode: inviteCode,
+    notificationsEnabled: notificationsEnabled,
   );
 }
 

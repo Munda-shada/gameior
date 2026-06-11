@@ -19,6 +19,7 @@ import 'package:gameior/features/sessions/presentation/game_detail_screen.dart';
 import 'package:gameior/features/sessions/presentation/game_payment_screen.dart';
 import 'package:gameior/features/sessions/presentation/complete_game_screen.dart';
 import 'package:gameior/features/sessions/presentation/create_game_screen.dart';
+import 'package:gameior/features/members/presentation/audit_logs_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -148,6 +149,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           groupId:    state.pathParameters['groupId']!,
           editGameId: state.uri.queryParameters['edit'],  // null = new game
           isTemplate: state.uri.queryParameters['template'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: 'audit-logs',
+        builder: (ctx, state) => AuditLogsScreen(
+          groupId: state.pathParameters['groupId']!,
+          filterTargetId: state.uri.queryParameters['targetId'],
         ),
       ),
     ],

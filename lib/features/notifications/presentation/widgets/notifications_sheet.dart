@@ -47,6 +47,8 @@ class NotificationsSheet extends ConsumerWidget {
         case 'join_approved':
         case 'join_rejected':
           context.push('/group/$groupId?tab=${GroupTab.members.index}');
+        case 'game_cancelled':
+          context.push('/group/$groupId?tab=${GroupTab.sessions.index}');
         default:
           context.push('/group/$groupId');
       }

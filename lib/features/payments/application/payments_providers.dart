@@ -26,6 +26,17 @@ class AdminDuesNotifier extends _$AdminDuesNotifier {
     await ref.read(paymentsRepositoryProvider).markAsPaid(dueId);
     ref.invalidateSelf();
   }
+
+  Future<void> markAllPaid(String userId) async {
+    await ref.read(paymentsRepositoryProvider).markAllDuesPaid(groupId: groupId, userId: userId);
+    ref.invalidateSelf();
+    ref.invalidate(adminDuesByPlayerProvider(groupId));
+    ref.invalidate(adminDuesByGameProvider(groupId));
+  }
+
+  Future<void> triggerReminders({String? userId}) async {
+    await ref.read(paymentsRepositoryProvider).remindDues(groupId: groupId, userId: userId);
+  }
 }
 
 @riverpod
@@ -104,4 +115,12 @@ Future<List<GameDuesSummary>> adminDuesByGame(AdminDuesByGameRef ref, String gro
     ));
   }
   return summaries;
+}
+
+@riverpod
+class PaymentsPlayerFilter extends _$PaymentsPlayerFilter {
+  @override
+  String? build(String groupId) => null;
+
+  void set(String? userId) => state = userId;
 }

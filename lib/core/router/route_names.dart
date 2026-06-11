@@ -12,4 +12,5 @@ abstract class Routes {
   static const profileNotifications = '/home/profile/notifications';
   static const profileDelete       = '/home/profile/delete-account';
   static const createGroup = '/home/groups/create';
+  static const groupAuditLogs = '/group/:groupId/audit-logs';
 }

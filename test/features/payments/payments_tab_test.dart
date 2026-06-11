@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gameior/features/payments/presentation/payments_tab.dart';
+import 'package:gameior/features/payments/presentation/widgets/custom_segmented_control.dart';
 
 void main() {
   group('CustomSegmentedControl Widget Test', () {
