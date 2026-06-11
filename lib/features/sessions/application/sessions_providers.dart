@@ -10,7 +10,7 @@ Future<List<Map<String, dynamic>>> upcomingGames(UpcomingGamesRef ref, String gr
   final client = ref.watch(supabaseClientProvider);
   final response = await client
       .from('games')
-      .select('*, rsvps(id, status, user_id, guest_count, user_is_playing, profiles:user_id(display_name, emoji))')
+      .select('*, rsvps(id, status, user_id, guest_count, user_is_playing, profiles:user_id(display_name, emoji)), payment_dues(*)')
       .eq('group_id', groupId)
       .eq('status', 'upcoming')
       .order('scheduled_at', ascending: true);
@@ -22,7 +22,7 @@ Future<List<Map<String, dynamic>>> pastGames(PastGamesRef ref, {required String 
   final client = ref.watch(supabaseClientProvider);
   final response = await client
       .from('games')
-      .select('*, rsvps(id, status, user_id, guest_count, user_is_playing, profiles:user_id(display_name, emoji))')
+      .select('*, rsvps(id, status, user_id, guest_count, user_is_playing, profiles:user_id(display_name, emoji)), payment_dues(*)')
       .eq('group_id', groupId)
       .neq('status', 'upcoming')
       .order('scheduled_at', ascending: false)

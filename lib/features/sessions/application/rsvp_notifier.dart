@@ -2,8 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
 import 'package:gameior/shared/models/enums.dart';
-import 'package:gameior/core/supabase/supabase_client.dart';
-
 part 'rsvp_notifier.freezed.dart';
 part 'rsvp_notifier.g.dart';
 

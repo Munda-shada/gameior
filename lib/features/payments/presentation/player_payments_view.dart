@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/payments/application/payments_providers.dart';
 import 'package:gameior/features/payments/domain/payment_due.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -27,14 +25,14 @@ class PlayerPaymentsView extends ConsumerStatefulWidget {
 
 class _PlayerPaymentsViewState extends ConsumerState<PlayerPaymentsView> {
   bool _gameWise = true;
-  String _activeFilter = 'All';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final myDuesAsync = ref.watch(myDuesNotifierProvider(widget.groupId));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
           Padding(
@@ -51,128 +49,246 @@ class _PlayerPaymentsViewState extends ConsumerState<PlayerPaymentsView> {
             ),
           ),
 
-          if (!_gameWise)
-            Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.base, right: AppSpacing.base, bottom: AppSpacing.sm),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: ['All', 'Paid', 'Unpaid', 'Pending'].map((filter) {
-                    final isSelected = _activeFilter == filter;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: ChoiceChip(
-                        label: Text(filter),
-                        selected: isSelected,
-                        selectedColor: AppColors.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _activeFilter = filter;
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
           Expanded(
             child: myDuesAsync.when(
               loading: () => const AppLoadingShimmer(type: ShimmerType.listTile),
-              error: (_, __) => AppErrorState(
+              error: (_, _) => AppErrorState(
                 message: 'Failed to load your dues',
                 onRetry: () => ref.invalidate(myDuesNotifierProvider(widget.groupId)),
               ),
               data: (dues) {
-                final filtered = dues.where((due) {
-                  if (_gameWise) {
-                    return due.status == DueStatus.unpaid || due.status == DueStatus.pendingVerification;
-                  } else {
-                    if (_activeFilter == 'Paid') return due.status == DueStatus.paid;
-                    if (_activeFilter == 'Unpaid') return due.status == DueStatus.unpaid;
-                    if (_activeFilter == 'Pending') return due.status == DueStatus.pendingVerification;
-                    return true;
-                  }
-                }).toList();
+                if (_gameWise) {
+                  // ── Pending Dues tab (unchanged) ──────────────────────────
+                  final pending = dues.where((d) =>
+                    d.status == DueStatus.unpaid ||
+                    d.status == DueStatus.pendingVerification,
+                  ).toList();
 
-                if (filtered.isEmpty) {
-                  return const AppEmptyState(
-                    icon: Icons.check_circle_outline,
-                    message: "You're all caught up ✓",
+                  if (pending.isEmpty) {
+                    return const AppEmptyState(
+                      icon: Icons.check_circle_outline,
+                      message: "You're all caught up ✓",
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () async =>
+                        ref.invalidate(myDuesNotifierProvider(widget.groupId)),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+                      itemCount: pending.length,
+                      itemBuilder: (ctx, index) =>
+                          _DueCard(due: pending[index], fallbackUpiId: widget.defaultUpiId, showSettle: true),
+                    ),
                   );
                 }
 
-                return RefreshIndicator(
-                  onRefresh: () async => ref.invalidate(myDuesNotifierProvider(widget.groupId)),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-                    itemCount: filtered.length,
-                    itemBuilder: (ctx, index) {
-                      final due = filtered[index];
-                      final double rupees = due.amountPaise / 100.0;
-                      final formattedDate = DateFormat('MMM d, yyyy').format(due.scheduledAt);
+                // ── Ledger tab — chronological month-grouped feed ──────────
+                if (dues.isEmpty) {
+                  return const AppEmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    message: 'No payment history yet.',
+                  );
+                }
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                        elevation: 0,
-                        color: AppColors.surface,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.xs),
-                          title: Text(due.gameTitle, style: AppTextStyles.headlineSmall),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(formattedDate, style: AppTextStyles.caption),
-                              const SizedBox(height: 4),
-                              StatusBadge(status: due.status),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '₹${rupees.toStringAsFixed(0)}',
-                                style: AppTextStyles.headlineLarge.copyWith(
-                                  color: due.status == DueStatus.paid ? AppColors.primaryDark : AppColors.destructive,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              if (_gameWise && due.status == DueStatus.unpaid)
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                                  ),
-                                  onPressed: () {
-                                    showAppBottomSheet(
-                                      context: context,
-                                      title: 'Settle Payment',
-                                      child: SettlePaymentSheet(due: due, fallbackUpiId: widget.defaultUpiId),
-                                    );
-                                  },
-                                  child: const Text('Settle'),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
+                // Sort descending by game date
+                final sorted = [...dues]
+                  ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+
+                // Group by month label
+                final grouped = <String, List<PaymentDue>>{};
+                for (final due in sorted) {
+                  final month = DateFormat('MMMM yyyy').format(due.scheduledAt);
+                  grouped.putIfAbsent(month, () => []).add(due);
+                }
+
+                final monthKeys = grouped.keys.toList();
+
+                return RefreshIndicator(
+                  onRefresh: () async =>
+                      ref.invalidate(myDuesNotifierProvider(widget.groupId)),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.base, vertical: AppSpacing.sm),
+                    itemCount: monthKeys.fold<int>(
+                        0, (sum, k) => sum + 1 + grouped[k]!.length),
+                    itemBuilder: (ctx, flatIndex) {
+                      // Flatten month headers + items into a single list
+                      int cursor = 0;
+                      for (final month in monthKeys) {
+                        if (flatIndex == cursor) {
+                          // Month header
+                          return _MonthHeader(month: month);
+                        }
+                        cursor++;
+                        final items = grouped[month]!;
+                        if (flatIndex < cursor + items.length) {
+                          final due = items[flatIndex - cursor];
+                          return _DueCard(
+                            due: due,
+                            fallbackUpiId: widget.defaultUpiId,
+                            showSettle: due.status == DueStatus.unpaid,
+                          );
+                        }
+                        cursor += items.length;
+                      }
+                      return const SizedBox.shrink();
                     },
                   ),
                 );
               },
             ),
-          )
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Month header widget ──────────────────────────────────────────────────────
+
+class _MonthHeader extends StatelessWidget {
+  final String month;
+  const _MonthHeader({required this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.base, bottom: AppSpacing.xs),
+      child: Text(
+        month.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          letterSpacing: 1.2,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Due card widget ──────────────────────────────────────────────────────────
+
+class _DueCard extends StatelessWidget {
+  final PaymentDue due;
+  final String fallbackUpiId;
+  final bool showSettle;
+
+  const _DueCard({
+    required this.due,
+    required this.fallbackUpiId,
+    required this.showSettle,
+  });
+
+  Color _stripeColor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return switch (due.status) {
+      DueStatus.paid                => cs.primary,
+      DueStatus.unpaid              => cs.error,
+      DueStatus.pendingVerification => cs.tertiary,
+      DueStatus.rejected            => cs.error,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final double rupees = due.amountPaise / 100.0;
+    final formattedDate = DateFormat('MMM d, yyyy').format(due.scheduledAt);
+    final stripe = _stripeColor(context);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      elevation: 0,
+      color: cs.surfaceContainer,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Status stripe
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: stripe,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppRadius.lg),
+                  bottomLeft: Radius.circular(AppRadius.lg),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.base, vertical: AppSpacing.sm),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Title + meta
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(due.gameTitle, style: theme.textTheme.headlineSmall),
+                          const SizedBox(height: 2),
+                          Text(formattedDate, style: theme.textTheme.labelSmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          )),
+                          const SizedBox(height: 4),
+                          StatusBadge(status: due.status),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    // Amount + settle button
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '₹${rupees.toStringAsFixed(0)}',
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            color: due.status == DueStatus.paid ? cs.primary : cs.error,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (showSettle) ...[
+                          const SizedBox(height: 4),
+                          Builder(
+                            builder: (ctx) => ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: cs.primary,
+                                foregroundColor: cs.onPrimary,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.md),
+                                minimumSize: const Size(0, 30),
+                              ),
+                              onPressed: () {
+                                showAppBottomSheet(
+                                  context: ctx,
+                                  title: 'Settle Payment',
+                                  child: SettlePaymentSheet(
+                                      due: due, fallbackUpiId: fallbackUpiId),
+                                );
+                              },
+                              child: const Text('Settle',
+                                  style: TextStyle(fontSize: 12)),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

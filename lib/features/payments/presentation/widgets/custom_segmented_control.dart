@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class CustomSegmentedControl extends StatelessWidget {
   final String label1;
@@ -19,12 +17,13 @@ class CustomSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
@@ -34,14 +33,14 @@ class CustomSegmentedControl extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
-                  color: isFirstSelected ? AppColors.primary : Colors.transparent,
+                  color: isFirstSelected ? theme.colorScheme.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.md - 1),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   label1,
-                  style: AppTextStyles.labelLarge.copyWith(
-                    color: isFirstSelected ? Colors.white : AppColors.textSecondary,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: isFirstSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -53,14 +52,14 @@ class CustomSegmentedControl extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
-                  color: !isFirstSelected ? AppColors.primary : Colors.transparent,
+                  color: !isFirstSelected ? theme.colorScheme.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.md - 1),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   label2,
-                  style: AppTextStyles.labelLarge.copyWith(
-                    color: !isFirstSelected ? Colors.white : AppColors.textSecondary,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: !isFirstSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),

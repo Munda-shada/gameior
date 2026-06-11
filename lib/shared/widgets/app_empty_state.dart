@@ -17,6 +17,7 @@ class AppEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -27,13 +28,15 @@ class AppEmptyState extends StatelessWidget {
             Icon(
               icon ?? Icons.sports_score,
               size: 64.0,
-              color: Colors.grey[400],
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 16.0),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16.0, color: Colors.grey[600]),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             if (ctaLabel != null && onCtaTap != null) ...[
               const SizedBox(height: 24.0),

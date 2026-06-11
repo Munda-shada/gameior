@@ -4,11 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
-import 'package:gameior/features/settings/application/group_settings_providers.dart';
 import 'package:gameior/features/groups/application/groups_provider.dart';
 import 'package:gameior/features/groups/domain/group.dart';
 import 'package:gameior/features/members/data/members_repository.dart';
@@ -258,6 +255,7 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
   @override
   Widget build(BuildContext context) {
     final isHost = widget.myRole == MemberRole.host;
+    final theme = Theme.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.base),
@@ -269,9 +267,9 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               children: [
@@ -321,15 +319,15 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
           const SectionHeader(title: 'AUDIT LOGS'),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: ListTile(
-              leading: const Icon(Icons.security_outlined, color: AppColors.primary),
-              title: const Text('View Admin Logs', style: AppTextStyles.headlineSmall),
-              subtitle: const Text('Auditing membership and role changes', style: AppTextStyles.bodySmall),
-              trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              leading: Icon(Icons.security_outlined, color: theme.colorScheme.primary),
+              title: Text('View Admin Logs', style: theme.textTheme.headlineSmall),
+              subtitle: Text('Auditing membership and role changes', style: theme.textTheme.bodySmall),
+              trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
               onTap: () {
                 context.push('/group/${widget.groupId}/audit-logs');
               },
@@ -342,33 +340,33 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               children: [
                 SwitchListTile.adaptive(
-                  title: const Text('Require Host Approval', style: AppTextStyles.headlineSmall),
-                  subtitle: const Text('New players must be approved by host to join', style: AppTextStyles.bodySmall),
+                  title: Text('Require Host Approval', style: theme.textTheme.headlineSmall),
+                  subtitle: Text('New players must be approved by host to join', style: theme.textTheme.bodySmall),
                   value: _requireApproval,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: theme.colorScheme.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (val) => setState(() => _requireApproval = val),
                 ),
                 SwitchListTile.adaptive(
-                  title: const Text('Allow Member Invites', style: AppTextStyles.headlineSmall),
-                  subtitle: const Text('Members can share the invite code with others', style: AppTextStyles.bodySmall),
+                  title: Text('Allow Member Invites', style: theme.textTheme.headlineSmall),
+                  subtitle: Text('Members can share the invite code with others', style: theme.textTheme.bodySmall),
                   value: _allowMemberInvites,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: theme.colorScheme.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (val) => setState(() => _allowMemberInvites = val),
                 ),
                 SwitchListTile.adaptive(
-                  title: const Text('Allow Guests', style: AppTextStyles.headlineSmall),
-                  subtitle: const Text('Members can add external guests when they RSVP', style: AppTextStyles.bodySmall),
+                  title: Text('Allow Guests', style: theme.textTheme.headlineSmall),
+                  subtitle: Text('Members can add external guests when they RSVP', style: theme.textTheme.bodySmall),
                   value: _allowGuests,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: theme.colorScheme.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (val) => setState(() => _allowGuests = val),
                 ),
@@ -388,14 +386,14 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Payment Model', style: AppTextStyles.headlineSmall),
+                Text('Payment Model', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
@@ -403,9 +401,9 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
                       child: ChoiceChip(
                         label: const Center(child: Text('PRE-PAID')),
                         selected: _paymentModel == PaymentModel.prepaid,
-                        selectedColor: AppColors.primary.withOpacity(0.15),
+                        selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                         labelStyle: TextStyle(
-                          color: _paymentModel == PaymentModel.prepaid ? AppColors.primaryDark : AppColors.textSecondary,
+                          color: _paymentModel == PaymentModel.prepaid ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (selected) {
@@ -418,9 +416,9 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
                       child: ChoiceChip(
                         label: const Center(child: Text('POST-PAID')),
                         selected: _paymentModel == PaymentModel.postpaid,
-                        selectedColor: AppColors.primary.withOpacity(0.15),
+                        selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                         labelStyle: TextStyle(
-                          color: _paymentModel == PaymentModel.postpaid ? AppColors.primaryDark : AppColors.textSecondary,
+                          color: _paymentModel == PaymentModel.postpaid ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (selected) {
@@ -445,10 +443,10 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 SwitchListTile.adaptive(
-                  title: const Text('Show Cost Breakdown', style: AppTextStyles.headlineSmall),
-                  subtitle: const Text('Show total cost calculations to players', style: AppTextStyles.bodySmall),
+                  title: Text('Show Cost Breakdown', style: theme.textTheme.headlineSmall),
+                  subtitle: Text('Show total cost calculations to players', style: theme.textTheme.bodySmall),
                   value: _showCostBreakdown,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: theme.colorScheme.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (val) {
                     setState(() {
@@ -494,7 +492,7 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.remove_circle_outline, color: AppColors.destructive),
+                            icon: Icon(Icons.remove_circle_outline, color: theme.colorScheme.error),
                             onPressed: () {
                               setState(() {
                                 _costItems.removeAt(idx);
@@ -521,10 +519,10 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
                     ),
                 ],
                 SwitchListTile.adaptive(
-                  title: const Text('Auto-Approve Payments', style: AppTextStyles.headlineSmall),
-                  subtitle: const Text('Automatically verify submitted UTR codes', style: AppTextStyles.bodySmall),
+                  title: Text('Auto-Approve Payments', style: theme.textTheme.headlineSmall),
+                  subtitle: Text('Automatically verify submitted UTR codes', style: theme.textTheme.bodySmall),
                   value: _autoApprovePayments,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: theme.colorScheme.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (val) => setState(() => _autoApprovePayments = val),
                 ),
@@ -544,9 +542,9 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               children: [
@@ -574,18 +572,18 @@ class _AdminSettingsViewState extends ConsumerState<AdminSettingsView> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.base),
               decoration: BoxDecoration(
-                color: AppColors.destructiveMuted,
+                color: theme.colorScheme.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.destructive.withOpacity(0.3)),
+                border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Permanent Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.destructive)),
+                  Text('Permanent Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: theme.colorScheme.error)),
                   const SizedBox(height: AppSpacing.xs),
-                  const Text(
+                  Text(
                     'Deleting a group will permanently remove all matches, payment dues, and member records. This cannot be undone.',
-                    style: TextStyle(fontSize: 12, color: AppColors.destructive),
+                    style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
                   ),
                   const SizedBox(height: AppSpacing.base),
                   AppButton(

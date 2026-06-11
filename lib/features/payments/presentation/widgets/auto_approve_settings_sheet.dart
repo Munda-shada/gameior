@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/payments/data/payments_repository.dart';
 import 'package:gameior/core/utils/app_toast.dart';
@@ -22,6 +20,7 @@ class _AutoApproveSettingsBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final groupCtxAsync = ref.watch(groupContextProvider(widget.groupId));
 
     return groupCtxAsync.when(
@@ -36,13 +35,13 @@ class _AutoApproveSettingsBottomSheetState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Payment Settings', style: AppTextStyles.headlineLarge),
+              Text('Payment Settings', style: theme.textTheme.headlineLarge),
               const SizedBox(height: AppSpacing.sm),
               SwitchListTile.adaptive(
-                activeColor: AppColors.primary,
+                activeThumbColor: theme.colorScheme.primary,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Auto-approve payments', style: AppTextStyles.headlineSmall),
-                subtitle: const Text('Skip manual UTR verification. Incoming player payments will be marked as PAID instantly.', style: AppTextStyles.bodySmall),
+                title: Text('Auto-approve payments', style: theme.textTheme.headlineSmall),
+                subtitle: Text('Skip manual UTR verification. Incoming player payments will be marked as PAID instantly.', style: theme.textTheme.bodySmall),
                 value: autoApprove,
                 onChanged: _isSaving
                     ? null

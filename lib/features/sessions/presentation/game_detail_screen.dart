@@ -5,10 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
-import 'package:gameior/features/settings/application/group_settings_providers.dart';
 import 'package:gameior/features/sessions/application/sessions_providers.dart';
 import 'package:gameior/features/sessions/data/sessions_repository.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -157,6 +155,7 @@ class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final detailAsync = ref.watch(gameDetailProvider(widget.gameId));
     final groupCtxAsync = ref.watch(groupContextProvider(widget.groupId));
     final currentUserId = ref.watch(supabaseClientProvider).auth.currentUser?.id;
@@ -225,7 +224,7 @@ class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
             final isRsvpClosed = isLocked || deadlinePassed || isPast;
 
             return Scaffold(
-              backgroundColor: AppColors.background,
+              backgroundColor: theme.colorScheme.surface,
               appBar: AppBar(
                 title: const Text('Match Details'),
                 actions: [
@@ -246,7 +245,13 @@ class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
                         const PopupMenuItem(value: 'edit', child: Text('Edit Game')),
                         PopupMenuItem(value: 'lock', child: Text(isLocked ? 'Unlock RSVP' : 'Lock RSVP')),
                         if (status == 'upcoming')
-                          const PopupMenuItem(value: 'cancel', child: Text('Cancel Game', style: TextStyle(color: AppColors.destructive))),
+                          PopupMenuItem(
+                            value: 'cancel',
+                            child: Text(
+                              'Cancel Game',
+                              style: TextStyle(color: theme.colorScheme.error),
+                            ),
+                          ),
                         if (status == 'upcoming' && paymentModel == 'postpaid' && DateTime.now().isAfter(scheduledAt.add(Duration(minutes: duration))))
                           const PopupMenuItem(value: 'complete', child: Text('Mark as Completed')),
                       ],

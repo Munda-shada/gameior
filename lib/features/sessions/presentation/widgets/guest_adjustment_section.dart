@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
 class GuestAdjustmentSection extends StatelessWidget {
@@ -24,6 +22,8 @@ class GuestAdjustmentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -31,16 +31,16 @@ class GuestAdjustmentSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
               CheckboxListTile.adaptive(
-                title: const Text('I am playing', style: AppTextStyles.headlineSmall),
+                title: Text('I am playing', style: theme.textTheme.headlineSmall),
                 value: userIsPlaying,
-                activeColor: AppColors.primary,
+                activeColor: theme.colorScheme.primary,
                 contentPadding: EdgeInsets.zero,
                 onChanged: onUserIsPlayingChanged,
               ),
@@ -48,22 +48,22 @@ class GuestAdjustmentSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Extra Guests', style: AppTextStyles.headlineSmall),
-                      Text('Add friends to play along', style: AppTextStyles.bodySmall),
+                      Text('Extra Guests', style: theme.textTheme.headlineSmall),
+                      Text('Add friends to play along', style: theme.textTheme.bodySmall),
                     ],
                   ),
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, color: AppColors.textSecondary),
+                        icon: Icon(Icons.remove_circle_outline, color: theme.colorScheme.onSurfaceVariant),
                         onPressed: onDecrementGuests,
                       ),
-                      Text('$guestCount', style: AppTextStyles.headlineMedium),
+                      Text('$guestCount', style: theme.textTheme.headlineMedium),
                       IconButton(
-                        icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+                        icon: Icon(Icons.add_circle_outline, color: theme.colorScheme.primary),
                         onPressed: onIncrementGuests,
                       ),
                     ],
@@ -74,7 +74,10 @@ class GuestAdjustmentSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.base),
                 Text(
                   'Warning: Session is full. Submitting payment will request slot verification from the organizer.',
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.destructive, fontWeight: FontWeight.bold),
+                  style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ],

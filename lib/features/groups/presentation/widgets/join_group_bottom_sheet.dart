@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/groups/application/groups_provider.dart';
 import 'package:gameior/features/groups/data/groups_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -30,6 +28,8 @@ class _JoinGroupBottomSheetState extends ConsumerState<JoinGroupBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.base,
@@ -43,11 +43,18 @@ class _JoinGroupBottomSheetState extends ConsumerState<JoinGroupBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Join with Code', style: AppTextStyles.displayMedium),
+            Text(
+              'Join with Code',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Enter the 6-character group invite code below.',
-              style: AppTextStyles.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
             AppTextField(
@@ -71,7 +78,9 @@ class _JoinGroupBottomSheetState extends ConsumerState<JoinGroupBottomSheet> {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 _errorMessage!,
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.destructive),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.xl),
@@ -97,7 +106,7 @@ class _JoinGroupBottomSheetState extends ConsumerState<JoinGroupBottomSheet> {
     final code = _controller.text.toUpperCase().trim();
     try {
       final result = await ref.read(groupsRepositoryProvider).joinGroup(code);
-      
+
       if (result.containsKey('error')) {
         setState(() {
           _errorMessage = result['message'] as String;

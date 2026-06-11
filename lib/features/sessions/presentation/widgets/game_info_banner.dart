@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class GameInfoBanner extends StatelessWidget {
   final String sport;
@@ -19,39 +17,44 @@ class GameInfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             sport.toUpperCase(),
-            style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(title, style: AppTextStyles.headlineLarge),
+          Text(title, style: theme.textTheme.headlineLarge),
           const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textSecondary),
+              Icon(Icons.calendar_today_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
-              Text(formattedTime, style: AppTextStyles.bodySmall),
+              Text(formattedTime, style: theme.textTheme.bodySmall),
             ],
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+              Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   venue,
-                  style: AppTextStyles.bodySmall,
+                  style: theme.textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

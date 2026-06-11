@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class AttendanceGauge extends StatelessWidget {
   final double attendancePct;
@@ -14,10 +12,11 @@ class AttendanceGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Overall Attendance', style: AppTextStyles.headlineMedium),
+        Text('Overall Attendance', style: theme.textTheme.headlineMedium),
         const SizedBox(height: AppSpacing.base),
         SizedBox(
           height: 150,
@@ -28,18 +27,18 @@ class AttendanceGauge extends StatelessWidget {
               startDegreeOffset: -90,
               sections: [
                 PieChartSectionData(
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   value: attendancePct,
                   title: '${attendancePct.toStringAsFixed(0)}%',
                   radius: 20,
-                  titleStyle: const TextStyle(
+                  titleStyle: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
                 PieChartSectionData(
-                  color: AppColors.border,
+                  color: theme.colorScheme.outlineVariant,
                   value: (100 - attendancePct).clamp(0, 100),
                   title: '',
                   radius: 15,

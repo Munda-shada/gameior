@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/domain/member_stats.dart';
 
 class MonthlyParticipationChart extends StatelessWidget {
@@ -25,10 +23,12 @@ class MonthlyParticipationChart extends StatelessWidget {
       }
     }
 
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Monthly Participation', style: AppTextStyles.headlineMedium),
+        Text('Monthly Participation', style: theme.textTheme.headlineMedium),
         const SizedBox(height: AppSpacing.base),
         SizedBox(
           height: 150,
@@ -47,7 +47,7 @@ class MonthlyParticipationChart extends StatelessWidget {
                       if (index >= 0 && index < monthlyData.length) {
                         final item = monthlyData[index];
                         final monthStr = DateFormat('MMM').format(DateTime(item.year, item.month));
-                        return Text(monthStr, style: AppTextStyles.caption);
+                        return Text(monthStr, style: theme.textTheme.labelSmall);
                       }
                       return const Text('');
                     },
@@ -59,7 +59,7 @@ class MonthlyParticipationChart extends StatelessWidget {
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   barWidth: 3,
                   dotData: const FlDotData(show: true),
                 ),

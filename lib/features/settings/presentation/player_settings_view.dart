@@ -3,9 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/settings/application/group_settings_providers.dart';
 import 'package:gameior/features/groups/application/groups_provider.dart';
@@ -48,7 +46,7 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
     );
 
     if (hasDues) {
-      if (mounted) {
+      if (context.mounted) {
         showAppDialog(
           context: context,
           title: 'Unpaid Dues Pending',
@@ -60,7 +58,7 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
     }
 
     // 2. Propose confirmation dialog to leave
-    if (!mounted) return;
+    if (!context.mounted) return;
     final confirm = await showAppDialog(
       context: context,
       title: 'Leave Group?',
@@ -100,6 +98,8 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
       _isInit = false;
     }
 
+    final theme = Theme.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.base),
       child: Column(
@@ -117,8 +117,11 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
                 margin: const EdgeInsets.only(bottom: AppSpacing.base),
                 padding: const EdgeInsets.all(AppSpacing.base),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryDark],
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.colorScheme.primary,
+                      theme.colorScheme.primary.withValues(alpha: 0.8),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -126,18 +129,18 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.emoji_events_outlined, color: Colors.white, size: 40),
+                    Icon(Icons.emoji_events_outlined, color: theme.colorScheme.onPrimary, size: 40),
                     const SizedBox(width: AppSpacing.base),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '$count',
-                          style: AppTextStyles.displayLarge.copyWith(color: Colors.white),
+                          style: theme.textTheme.displayLarge?.copyWith(color: theme.colorScheme.onPrimary),
                         ),
                         Text(
                           'Matches Played in Club',
-                          style: AppTextStyles.labelMedium.copyWith(color: Colors.white.withOpacity(0.8)),
+                          style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
                         ),
                       ],
                     ),
@@ -152,15 +155,15 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: SwitchListTile.adaptive(
-              title: const Text('Group Notifications', style: AppTextStyles.headlineSmall),
-              subtitle: const Text('Get push notifications for this group\'s games', style: AppTextStyles.bodySmall),
+              title: Text('Group Notifications', style: theme.textTheme.headlineSmall),
+              subtitle: Text('Get push notifications for this group\'s games', style: theme.textTheme.bodySmall),
               value: _notificationsEnabled,
-              activeColor: AppColors.primary,
+              activeThumbColor: theme.colorScheme.primary,
               onChanged: (val) async {
                 setState(() => _notificationsEnabled = val);
                 final client = ref.read(supabaseClientProvider);
@@ -173,11 +176,11 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
                         .eq('group_id', widget.groupId)
                         .eq('user_id', userId);
                     ref.invalidate(groupContextProvider(widget.groupId));
-                    if (mounted) {
+                    if (context.mounted) {
                       showToast(context, 'Notifications ${val ? 'enabled' : 'disabled'} for this group.');
                     }
                   } catch (e) {
-                    if (mounted) {
+                    if (context.mounted) {
                       showToast(context, 'Failed to update preferences: $e', isError: true);
                     }
                   }
@@ -192,9 +195,9 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: hostProfileAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -219,15 +222,15 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Default UPI ID', style: AppTextStyles.bodySmall),
+                              Text('Default UPI ID', style: theme.textTheme.bodySmall),
                               const SizedBox(height: 2),
-                              Text(widget.group.defaultUpiId ?? 'None', style: AppTextStyles.headlineSmall),
+                              Text(widget.group.defaultUpiId ?? 'None', style: theme.textTheme.headlineSmall),
                             ],
                           ),
                         ),
                         if (hasUpi)
                           IconButton(
-                            icon: const Icon(Icons.copy, color: AppColors.primary),
+                            icon: Icon(Icons.copy, color: theme.colorScheme.primary),
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: widget.group.defaultUpiId!));
                               showToast(context, 'UPI ID copied to clipboard!');
@@ -248,15 +251,15 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
             padding: const EdgeInsets.all(AppSpacing.base),
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Text(
               widget.group.clubRules?.isNotEmpty == true
                   ? widget.group.clubRules!
                   : 'No rules set by organizer yet.',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
             ),
           ),
           const SizedBox(height: AppSpacing.base),
@@ -267,18 +270,18 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
             padding: const EdgeInsets.all(AppSpacing.base),
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.destructiveMuted,
+              color: theme.colorScheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.destructive.withOpacity(0.3)),
+              border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Leave Group', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.destructive)),
+                Text('Leave Group', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: theme.colorScheme.error)),
                 const SizedBox(height: AppSpacing.xs),
-                const Text(
+                Text(
                   'Leaving the group removes your access to the game calendar, announcements, and match history.',
-                  style: TextStyle(fontSize: 12, color: AppColors.destructive),
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
                 ),
                 const SizedBox(height: AppSpacing.base),
                 AppButton(
@@ -296,14 +299,15 @@ class _PlayerSettingsViewState extends ConsumerState<PlayerSettingsView> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppTextStyles.bodySmall),
+          Text(label, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.xs),
-          Text(value, style: AppTextStyles.headlineSmall),
+          Text(value, style: theme.textTheme.headlineSmall),
         ],
       ),
     );

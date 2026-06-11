@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gameior/core/constants/app_constants.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -100,7 +98,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         title: const Text('Set Up Your Profile'),
         automaticallyImplyLeading: false, // no back button
@@ -120,7 +118,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       Text(_selectedEmoji, 
                            style: const TextStyle(fontSize: 72)),
                       Text('Tap to change',
-                           style: AppTextStyles.caption),
+                           style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
 class AttendanceChecklist extends StatelessWidget {
@@ -26,6 +24,8 @@ class AttendanceChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -37,18 +37,21 @@ class AttendanceChecklist extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (eligiblePlayers.isEmpty)
-                const Center(
+                Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.base),
-                    child: Text('No players confirmed (YES/Guest) for this session.', style: AppTextStyles.bodyMedium),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.base),
+                    child: Text(
+                      'No players confirmed (YES/Guest) for this session.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
                 )
               else ...[
@@ -58,21 +61,33 @@ class AttendanceChecklist extends StatelessWidget {
                     children: [
                       Text(
                         '${attendedPlayerIds.length} of ${eligiblePlayers.length} attended',
-                        style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       IntrinsicHeight(
                         child: Row(
                           children: [
                             TextButton(
-                              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(60, 30)),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(60, 30),
+                              ),
                               onPressed: onSelectAll,
-                              child: const Text('Select All', style: TextStyle(fontSize: 12)),
+                              child: Text(
+                                'Select All',
+                                style: theme.textTheme.labelSmall,
+                              ),
                             ),
                             const VerticalDivider(width: 8, thickness: 1, indent: 4, endIndent: 4),
                             TextButton(
-                              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(60, 30)),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(60, 30),
+                              ),
                               onPressed: onClearAll,
-                              child: const Text('Clear All', style: TextStyle(fontSize: 12)),
+                              child: Text(
+                                'Clear All',
+                                style: theme.textTheme.labelSmall,
+                              ),
                             ),
                           ],
                         ),
@@ -89,19 +104,24 @@ class AttendanceChecklist extends StatelessWidget {
                   final isAttending = attendedPlayerIds.contains(userId);
 
                   return CheckboxListTile.adaptive(
-                    activeColor: AppColors.primary,
+                    activeColor: theme.colorScheme.primary,
                     contentPadding: EdgeInsets.zero,
                     enabled: !allDuesSettled,
                     title: Row(
                       children: [
-                        Text(emoji, style: const TextStyle(fontSize: 20)),
+                        Text(
+                          emoji,
+                          style: theme.textTheme.headlineSmall,
+                        ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
                             name,
-                            style: AppTextStyles.bodyLarge.copyWith(
+                            style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: isAttending ? FontWeight.bold : FontWeight.normal,
-                              color: isAttending ? AppColors.textPrimary : AppColors.textSecondary,
+                              color: isAttending
+                                  ? theme.colorScheme.onSurface
+                                  : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),

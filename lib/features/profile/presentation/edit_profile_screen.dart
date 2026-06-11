@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
 import 'package:gameior/features/profile/data/profile_repository.dart';
 import 'package:gameior/shared/widgets/app_bottom_sheet.dart';
@@ -104,8 +102,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Edit Profile'),
         actions: [
@@ -134,10 +133,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         style: const TextStyle(fontSize: 72),
                       ),
                       const SizedBox(height: AppSpacing.xs),
-                      const Text(
+                      Text(
                         'Tap to change',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 12,
                         ),
                       ),
@@ -146,7 +145,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Text('Display Name', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+              Text('Display Name', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.sm),
               TextFormField(
                 controller: _displayNameController,
@@ -159,7 +158,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 },
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Phone Number', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+              Text('Phone Number', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.sm),
               TextFormField(
                 controller: _phoneController,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gameior/core/theme/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/settings/application/group_settings_providers.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
@@ -13,6 +12,7 @@ class OrganizerContactCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final hostProfileAsync = ref.watch(hostProfileProvider(hostId));
 
     return Column(
@@ -22,28 +22,50 @@ class OrganizerContactCard extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: hostProfileAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Text('Could not fetch host profile'),
             data: (host) {
               final name = host?['display_name'] as String? ?? 'Organizer';
-              final phone = host?['phone'] as String? ?? 'No contact info';
+              final phone = host?['phone'] as String? ?? '';
+              final hasPhone = phone.isNotEmpty;
+              final cleanPhone = phone.replaceAll('+', '');
 
               return Row(
                 children: [
-                  const Icon(Icons.person_outline, size: 24, color: AppColors.primary),
+                  Icon(Icons.person_outline, size: 24, color: theme.colorScheme.primary),
                   const SizedBox(width: AppSpacing.sm),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(name, style: AppTextStyles.headlineSmall),
-                      Text('Contact: $phone', style: AppTextStyles.bodySmall),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: theme.textTheme.headlineSmall),
+                        Text(
+                          hasPhone ? phone : 'No contact info',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
+                  if (hasPhone) ...[
+                    IconButton(
+                      icon: Icon(Icons.phone, color: theme.colorScheme.primary, size: 20),
+                      tooltip: 'Call',
+                      onPressed: () => launchUrl(Uri.parse('tel:$phone')),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chat, color: Color(0xFF25D366), size: 20),
+                      tooltip: 'WhatsApp',
+                      onPressed: () => launchUrl(
+                        Uri.parse('https://wa.me/$cleanPhone'),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                    ),
+                  ],
                 ],
               );
             },

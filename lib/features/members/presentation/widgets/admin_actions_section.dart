@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -29,10 +27,15 @@ class AdminActionsSection extends ConsumerWidget {
     super.key,
   });
 
-  Future<void> _launchUrl(String url) async {
+  Future<void> _launchUrl(String url, {String? fallback}) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (fallback != null) {
+      final fallbackUri = Uri.parse(fallback);
+      if (await canLaunchUrl(fallbackUri)) {
+        await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+      }
     }
   }
 
@@ -71,17 +74,18 @@ class AdminActionsSection extends ConsumerWidget {
     if (isMe) return const SizedBox.shrink();
 
     final adminDuesByPlayerAsync = ref.watch(adminDuesByPlayerProvider(groupId));
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
         const SizedBox(height: AppSpacing.sm),
-        const Text('Admin Actions', style: AppTextStyles.headlineMedium),
+        Text('Admin Actions', style: theme.textTheme.headlineMedium),
         const SizedBox(height: AppSpacing.base),
         adminDuesByPlayerAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
           data: (summaries) {
             final summary = summaries.firstWhere(
               (s) => s.playerId == member.userId,
@@ -103,13 +107,13 @@ class AdminActionsSection extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.base),
               decoration: BoxDecoration(
                 color: summary.totalPendingPaise > 0 
-                    ? AppColors.destructiveMuted 
-                    : AppColors.primaryMuted,
+                    ? theme.colorScheme.error.withValues(alpha: 0.1) 
+                    : theme.colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(
                   color: (summary.totalPendingPaise > 0 
-                      ? AppColors.destructive 
-                      : AppColors.primary).withOpacity(0.3),
+                      ? theme.colorScheme.error 
+                      : theme.colorScheme.primary).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -119,8 +123,8 @@ class AdminActionsSection extends ConsumerWidget {
                         ? Icons.warning_amber_rounded 
                         : Icons.check_circle_outline,
                     color: summary.totalPendingPaise > 0 
-                        ? AppColors.destructive 
-                        : AppColors.primary,
+                        ? theme.colorScheme.error 
+                        : theme.colorScheme.primary,
                     size: 32,
                   ),
                   const SizedBox(width: AppSpacing.base),
@@ -130,27 +134,27 @@ class AdminActionsSection extends ConsumerWidget {
                       children: [
                         Text(
                           summary.totalPendingPaise > 0 ? 'Pending Dues' : 'No Pending Dues',
-                          style: AppTextStyles.headlineSmall.copyWith(
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             color: summary.totalPendingPaise > 0 
-                                ? AppColors.destructive 
-                                : AppColors.primaryDark,
+                                ? theme.colorScheme.error 
+                                : theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         if (summary.totalPendingPaise > 0)
                           Text(
                             'Outstanding from ${summary.gameCount} session(s)',
-                            style: AppTextStyles.bodySmall,
+                            style: theme.textTheme.bodySmall,
                           ),
                       ],
                     ),
                   ),
                   Text(
                     amountText,
-                    style: AppTextStyles.displayMedium.copyWith(
+                    style: theme.textTheme.displayMedium?.copyWith(
                       color: summary.totalPendingPaise > 0 
-                          ? AppColors.destructive 
-                          : AppColors.primaryDark,
+                          ? theme.colorScheme.error 
+                          : theme.colorScheme.primary,
                     ),
                   ),
                 ],
@@ -159,22 +163,37 @@ class AdminActionsSection extends ConsumerWidget {
           },
         ),
         if (member.phone.isNotEmpty) ...[
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: 'WhatsApp',
-                  onPressed: () => _launchUrl('https://wa.me/${member.phone.replaceAll('+', '')}'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: AppButton(
-                  label: 'Call',
-                  onPressed: () => _launchUrl('tel:${member.phone}'),
-                ),
-              ),
-            ],
+          Builder(
+            builder: (context) {
+              final cs = Theme.of(context).colorScheme;
+              final phone = member.phone.replaceAll('+', '');
+              return Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'WhatsApp',
+                      variant: AppButtonVariant.custom,
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                      onPressed: () => _launchUrl(
+                        'whatsapp://send?phone=$phone',
+                        fallback: 'https://wa.me/$phone',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Call',
+                      variant: AppButtonVariant.custom,
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      onPressed: () => _launchUrl('tel:${member.phone}'),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.base),
         ],
@@ -351,6 +370,7 @@ class _TransferOwnershipDialogState extends State<TransferOwnershipDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Transfer Group Ownership?'),
       content: Column(
@@ -359,12 +379,12 @@ class _TransferOwnershipDialogState extends State<TransferOwnershipDialog> {
         children: [
           Text(
             'This action CANNOT be undone. You will be demoted to Co-Host and ${widget.memberName} will become the new Host of the group.',
-            style: const TextStyle(color: AppColors.destructive, fontSize: 13),
+            style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
           ),
           const SizedBox(height: AppSpacing.base),
-          const Text(
+          Text(
             'Type "TRANSFER" to authorize this action:',
-            style: AppTextStyles.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
@@ -388,8 +408,8 @@ class _TransferOwnershipDialogState extends State<TransferOwnershipDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.destructive,
-            foregroundColor: Colors.white,
+            backgroundColor: theme.colorScheme.error,
+            foregroundColor: theme.colorScheme.onError,
           ),
           onPressed: (_isValid && !_isSubmitting)
               ? () async {
@@ -403,7 +423,7 @@ class _TransferOwnershipDialogState extends State<TransferOwnershipDialog> {
                 }
               : null,
           child: _isSubmitting
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onError))
               : const Text('Confirm Transfer'),
         ),
       ],
@@ -426,12 +446,13 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? AppColors.destructive : AppColors.textPrimary;
+    final theme = Theme.of(context);
+    final color = isDestructive ? theme.colorScheme.error : theme.colorScheme.onSurface;
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(
         label,
-        style: AppTextStyles.bodyMedium.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: color,
           fontWeight: isDestructive ? FontWeight.bold : FontWeight.normal,
         ),

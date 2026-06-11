@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/core/utils/app_toast.dart';
 
 class GameHeaderCard extends StatelessWidget {
@@ -37,12 +34,14 @@ class GameHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,22 +51,29 @@ class GameHeaderCard extends StatelessWidget {
             children: [
               Text(
                 game['sport'].toString().toUpperCase(),
-                style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: status == 'upcoming'
-                      ? AppColors.primaryMuted
-                      : (status == 'completed' ? Colors.blue[50] : Colors.grey[100]),
+                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      : (status == 'completed'
+                          ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                          : theme.colorScheme.surfaceContainerHighest),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Text(
                   status.toUpperCase(),
                   style: TextStyle(
                     color: status == 'upcoming'
-                        ? AppColors.primaryDark
-                        : (status == 'completed' ? Colors.blue[800] : AppColors.textDisabled),
+                        ? theme.colorScheme.primary
+                        : (status == 'completed'
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -76,17 +82,17 @@ class GameHeaderCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(title, style: AppTextStyles.displayMedium),
+          Text(title, style: theme.textTheme.displayMedium),
           const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              Text('$duration mins session', style: AppTextStyles.bodySmall),
+              Text('$duration mins session', style: theme.textTheme.bodySmall),
               const SizedBox(width: AppSpacing.sm),
-              const Text('•', style: AppTextStyles.bodySmall),
+              Text('•', style: theme.textTheme.bodySmall),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 _formatSkillLevels(game['allowed_skill_levels'] as List? ?? []),
-                style: AppTextStyles.bodySmall,
+                style: theme.textTheme.bodySmall,
               ),
             ],
           ),
@@ -94,13 +100,13 @@ class GameHeaderCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined, size: 20, color: AppColors.textSecondary),
+              Icon(Icons.location_on_outlined, size: 20, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(venue, style: AppTextStyles.headlineSmall),
+                    Text(venue, style: theme.textTheme.headlineSmall),
                     if (game['maps_link'] != null && (game['maps_link'] as String).isNotEmpty)
                       TextButton.icon(
                         icon: const Icon(Icons.map_outlined, size: 16),
@@ -134,9 +140,12 @@ class GameHeaderCard extends StatelessWidget {
           ),
           if (desc != null && desc!.isNotEmpty) ...[
             const Divider(height: AppSpacing.lg),
-            const Text('Organizer Notes:', style: AppTextStyles.labelSmall),
+            Text('Organizer Notes:', style: theme.textTheme.labelSmall),
             const SizedBox(height: 4),
-            Text(desc!, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
+            Text(
+              desc!,
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+            ),
           ],
         ],
       ),

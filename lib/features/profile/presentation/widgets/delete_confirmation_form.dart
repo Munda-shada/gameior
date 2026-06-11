@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 
 class DeleteConfirmationForm extends StatefulWidget {
@@ -43,51 +41,54 @@ class _DeleteConfirmationFormState extends State<DeleteConfirmationForm> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.warning_amber_rounded,
-            color: AppColors.destructive,
+            color: colorScheme.error,
             size: 48,
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
+          Text(
             'Delete Your Account?',
-            style: AppTextStyles.headlineMedium,
+            style: textTheme.headlineMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
-          const Text(
+          Text(
             'If you delete your account, you will permanently lose your profile, group memberships, and game history. This action cannot be undone.',
-            style: AppTextStyles.bodyMedium,
+            style: textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.xl),
           Row(
             children: [
               Checkbox(
                 value: _confirmChecked,
-                activeColor: AppColors.destructive,
+                activeColor: colorScheme.error,
                 onChanged: widget.isDeleting
                     ? null
                     : (val) {
                         setState(() => _confirmChecked = val ?? false);
                       },
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'I understand that my account will be permanently deleted.',
-                  style: AppTextStyles.bodySmall,
+                  style: textTheme.bodySmall,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           if (_confirmChecked) ...[
-            const Text(
+            Text(
               'Type "DELETE" to confirm account deletion:',
-              style: AppTextStyles.bodySmall,
+              style: textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.xs),
             TextFormField(

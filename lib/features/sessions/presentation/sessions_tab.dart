@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:gameior/core/constants/app_constants.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_error_state.dart';
@@ -25,6 +24,7 @@ class _SessionsTabState extends ConsumerState<SessionsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final contextAsync = ref.watch(groupContextProvider(widget.groupId));
 
     return contextAsync.when(
@@ -42,16 +42,16 @@ class _SessionsTabState extends ConsumerState<SessionsTab> {
         return DefaultTabController(
           length: 2,
           child: Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.colorScheme.surface,
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(48),
               child: Container(
-                color: AppColors.surface,
-                child: const TabBar(
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  indicatorColor: AppColors.primary,
-                  tabs: [
+                color: theme.colorScheme.surfaceContainer,
+                child: TabBar(
+                  labelColor: theme.colorScheme.primary,
+                  unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                  indicatorColor: theme.colorScheme.primary,
+                  tabs: const [
                     Tab(text: 'Upcoming Games'),
                     Tab(text: 'Past Games'),
                   ],
@@ -75,8 +75,8 @@ class _SessionsTabState extends ConsumerState<SessionsTab> {
             ),
             floatingActionButton: isAdmin
                 ? FloatingActionButton(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     onPressed: () => context.push('/group/${widget.groupId}/create-game'),
                     child: const Icon(Icons.add),
                   )

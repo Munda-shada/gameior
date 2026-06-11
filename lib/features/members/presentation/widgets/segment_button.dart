@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class SegmentButton extends StatelessWidget {
   final String label;
@@ -19,18 +17,19 @@ class SegmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.surface : Colors.transparent,
+          color: isActive ? theme.colorScheme.surfaceContainer : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -42,8 +41,8 @@ class SegmentButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: isActive ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -52,13 +51,13 @@ class SegmentButton extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.waitlist, // Orange badge for pending requests
+                  color: theme.colorScheme.tertiary, // Orange badge for pending requests
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
                   '$badgeCount',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.colorScheme.onTertiary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),

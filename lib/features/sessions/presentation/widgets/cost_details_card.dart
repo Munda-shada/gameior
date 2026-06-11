@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
 class CostDetailsCard extends StatelessWidget {
@@ -20,6 +18,8 @@ class CostDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,9 +27,9 @@ class CostDetailsCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,10 +37,13 @@ class CostDetailsCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Payment Model:', style: AppTextStyles.bodyMedium),
+                  Text('Payment Model:', style: theme.textTheme.bodyMedium),
                   Text(
                     paymentModel == 'prepaid' ? 'PRE-PAID' : 'POST-PAID',
-                    style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -50,17 +53,19 @@ class CostDetailsCard extends StatelessWidget {
                 children: [
                   Text(
                     paymentModel == 'prepaid' ? 'Match Fee:' : 'Estimated Fee:',
-                    style: AppTextStyles.headlineSmall,
+                    style: theme.textTheme.headlineSmall,
                   ),
                   Text(
                     '₹${(costPaise / 100).toStringAsFixed(0)}',
-                    style: AppTextStyles.displayMedium.copyWith(color: AppColors.primaryDark),
+                    style: (theme.textTheme.displayMedium ?? const TextStyle()).copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
               if (showBreakdown && costItems.isNotEmpty) ...[
                 const Divider(height: AppSpacing.base),
-                const Text('Cost Breakdown:', style: AppTextStyles.labelSmall),
+                Text('Cost Breakdown:', style: theme.textTheme.labelSmall),
                 const SizedBox(height: AppSpacing.xs),
                 ...costItems.map((item) {
                   final label = item['label'] as String? ?? 'Item';
@@ -70,8 +75,8 @@ class CostDetailsCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(label, style: AppTextStyles.bodyMedium),
-                        Text('₹${(amt / 100).toStringAsFixed(0)}', style: AppTextStyles.bodySmall),
+                        Text(label, style: theme.textTheme.bodyMedium),
+                        Text('₹${(amt / 100).toStringAsFixed(0)}', style: theme.textTheme.bodySmall),
                       ],
                     ),
                   );

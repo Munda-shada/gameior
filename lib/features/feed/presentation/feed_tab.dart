@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameior/core/constants/app_constants.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/feed/application/feed_providers.dart';
 import 'package:gameior/features/payments/application/feed_dues_provider.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
@@ -40,15 +38,16 @@ class _FeedTabState extends ConsumerState<FeedTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final profileAsync = ref.watch(currentUserProvider);
     final upcomingGamesAsync = ref.watch(feedUpcomingGamesProvider);
     final announcementsAsync = ref.watch(feedAnnouncementsProvider);
     final userId = ref.watch(supabaseClientProvider).auth.currentUser?.id;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
       body: RefreshIndicator(
-        color: AppColors.primary,
+        color: theme.colorScheme.primary,
         onRefresh: () async {
           ref.invalidate(feedDuesSummaryProvider);
           ref.invalidate(feedUpcomingGamesProvider);
@@ -78,7 +77,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                   label: 'UPCOMING SESSIONS',
                   shimmerType: ShimmerType.gameCard,
                 ),
-                error: (e, __) => Padding(
+                error: (e, stack) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
                   child: AppErrorState(
                     message: 'Failed to load upcoming sessions',
@@ -98,30 +97,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SectionHeader(title: 'UPCOMING SESSIONS'),
-                            if (hasMore)
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                onPressed: () {
-                                  setState(() => _showAllSessions = !_showAllSessions);
-                                },
-                                child: Text(
-                                  _showAllSessions
-                                      ? 'Show Less'
-                                      : 'See All (${games.length})',
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                        const SectionHeader(title: 'UPCOMING SESSIONS'),
                         const SizedBox(height: AppSpacing.sm),
                         ...displayGames.map(
                           (game) => UpcomingSessionTile(
@@ -129,6 +105,26 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                             userId: userId,
                           ),
                         ),
+                        if (hasMore) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                setState(() => _showAllSessions = !_showAllSessions);
+                              },
+                              icon: Icon(
+                                _showAllSessions ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _showAllSessions 
+                                    ? 'Show Less' 
+                                    : 'Show More (${games.length - AppConstants.feedUpcomingGamesLimit} more)',
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: AppSpacing.base),
                       ],
                     ),
@@ -141,7 +137,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
             SliverToBoxAdapter(
               child: upcomingGamesAsync.when(
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (error, stack) => const SizedBox.shrink(),
                 data: (games) {
                   if (games.isNotEmpty) return const SizedBox.shrink();
                   return const _EmptyFeedState();
@@ -156,7 +152,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                   label: 'ANNOUNCEMENTS',
                   shimmerType: ShimmerType.card,
                 ),
-                error: (e, __) => Padding(
+                error: (e, stack) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
                   child: AppErrorState(
                     message: 'Failed to load announcements',
@@ -176,36 +172,33 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SectionHeader(title: 'ANNOUNCEMENTS'),
-                            if (hasMore)
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _showAllAnnouncements = !_showAllAnnouncements;
-                                  });
-                                },
-                                child: Text(
-                                  _showAllAnnouncements
-                                      ? 'Show Less'
-                                      : 'View All (${announcements.length})',
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                        const SectionHeader(title: 'ANNOUNCEMENTS'),
                         const SizedBox(height: AppSpacing.sm),
                         ...displayItems.map(
                           (item) => AnnouncementCard(item: item),
                         ),
+                        if (hasMore) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showAllAnnouncements = !_showAllAnnouncements;
+                                });
+                              },
+                              icon: Icon(
+                                _showAllAnnouncements ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _showAllAnnouncements 
+                                    ? 'Show Less' 
+                                    : 'Show More (${announcements.length - 1} more)',
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: AppSpacing.xl),
                       ],
                     ),
@@ -227,6 +220,7 @@ class _EmptyFeedState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xl,
@@ -237,8 +231,8 @@ class _EmptyFeedState extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryMuted,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Center(
@@ -246,14 +240,18 @@ class _EmptyFeedState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.base),
-          const Text(
+          Text(
             'Your court is empty',
-            style: AppTextStyles.headlineMedium,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          const Text(
+          Text(
             'Join a group or create one to start scheduling games with your crew.',
-            style: AppTextStyles.bodyMedium,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),

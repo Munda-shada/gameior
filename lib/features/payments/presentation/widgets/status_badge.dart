@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
 import 'package:gameior/shared/models/enums.dart';
 
@@ -9,29 +8,30 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bg = Colors.grey.shade100;
-    Color fg = Colors.grey.shade600;
+    final theme = Theme.of(context);
+    Color bg = theme.colorScheme.surfaceContainerHighest;
+    Color fg = theme.colorScheme.onSurfaceVariant;
     String label = 'UNPAID';
 
     switch (status) {
       case DueStatus.unpaid:
-        bg = AppColors.destructiveMuted;
-        fg = AppColors.destructive;
+        bg = theme.colorScheme.error.withValues(alpha: 0.1);
+        fg = theme.colorScheme.error;
         label = 'UNPAID';
         break;
       case DueStatus.pendingVerification:
-        bg = AppColors.waitlistMuted;
-        fg = AppColors.waitlist;
+        bg = theme.colorScheme.tertiary.withValues(alpha: 0.1);
+        fg = theme.colorScheme.tertiary;
         label = 'PENDING VERIFICATION';
         break;
       case DueStatus.paid:
-        bg = AppColors.primaryMuted;
-        fg = AppColors.primaryDark;
+        bg = theme.colorScheme.primary.withValues(alpha: 0.1);
+        fg = theme.colorScheme.primary;
         label = 'PAID';
         break;
       case DueStatus.rejected:
-        bg = AppColors.destructiveMuted;
-        fg = AppColors.destructive;
+        bg = theme.colorScheme.error.withValues(alpha: 0.1);
+        fg = theme.colorScheme.error;
         label = 'REJECTED';
         break;
     }

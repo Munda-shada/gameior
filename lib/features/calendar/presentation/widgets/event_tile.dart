@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 
 class GameEventTile extends StatelessWidget {
   final Map<String, dynamic> game;
@@ -16,19 +15,20 @@ class GameEventTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rsvps = game['rsvps'] as List<dynamic>? ?? [];
     final myRsvp = rsvps.whereType<Map<String, dynamic>>().firstWhere(
           (r) => r['user_id'] == currentUserId,
           orElse: () => <String, dynamic>{},
         );
 
-    Color dotColor = Colors.grey;
+    Color dotColor = theme.colorScheme.outline;
     final status = myRsvp['status'];
     if (myRsvp.isNotEmpty) {
       if (status == 'yes' || myRsvp['user_is_playing'] == true) {
-        dotColor = Colors.green;
+        dotColor = theme.colorScheme.primary;
       } else if (status == 'waitlist') {
-        dotColor = Colors.orange;
+        dotColor = theme.colorScheme.tertiary;
       }
     }
 
@@ -77,34 +77,34 @@ class GameEventTile extends StatelessWidget {
                           Expanded(
                             child: Text(
                               displayTitle,
-                              style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (rsvpLocked)
-                            const Padding(
-                              padding: EdgeInsets.only(left: AppSpacing.xs),
-                              child: Icon(Icons.lock, size: 16, color: Colors.grey),
+                            Padding(
+                              padding: const EdgeInsets.only(left: AppSpacing.xs),
+                              child: Icon(Icons.lock, size: 16, color: theme.colorScheme.onSurfaceVariant),
                             ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         timeString,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.grey[600],
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         children: [
-                          Icon(Icons.group, size: 16, color: Colors.grey[600]),
+                          Icon(Icons.group, size: 16, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(width: AppSpacing.xs),
                           Expanded(
                             child: Text(
                               groupName,
-                              style: AppTextStyles.bodyMedium,
+                              style: theme.textTheme.bodyMedium,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -117,13 +117,13 @@ class GameEventTile extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.2),
+                                color: theme.colorScheme.tertiary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 'Waitlist #$waitlistPos',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: Colors.orange[800],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.tertiary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),

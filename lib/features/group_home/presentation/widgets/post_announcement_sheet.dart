@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_home/application/group_home_providers.dart';
 import 'package:gameior/shared/widgets/app_button.dart';
 import 'package:gameior/shared/widgets/app_text_field.dart';
@@ -31,6 +29,7 @@ class _PostAnnouncementBottomSheetState extends ConsumerState<PostAnnouncementBo
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final announcementsAsync = ref.watch(groupAnnouncementsProvider(widget.groupId));
     final gamesAsync = ref.watch(groupUpcomingGamesProvider(widget.groupId));
 
@@ -39,7 +38,7 @@ class _PostAnnouncementBottomSheetState extends ConsumerState<PostAnnouncementBo
         padding: EdgeInsets.all(AppSpacing.base),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const Padding(
+      error: (error, stackTrace) => const Padding(
         padding: EdgeInsets.all(AppSpacing.base),
         child: Center(child: Text('Failed to load announcements limit check')),
       ),
@@ -50,16 +49,24 @@ class _PostAnnouncementBottomSheetState extends ConsumerState<PostAnnouncementBo
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.warning_amber_rounded, color: AppColors.destructive, size: 48),
-                const SizedBox(height: AppSpacing.sm),
-                const Text(
-                  'Limit Reached',
-                  style: AppTextStyles.headlineLarge,
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: theme.colorScheme.error,
+                  size: 48,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                const Text(
+                Text(
+                  'Limit Reached',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
                   '5/5 Announcements — delete an old one to post a new announcement.',
-                  style: AppTextStyles.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -90,19 +97,26 @@ class _PostAnnouncementBottomSheetState extends ConsumerState<PostAnnouncementBo
                 hint: 'Share updates or news with your group members...',
               ),
               const SizedBox(height: AppSpacing.base),
-              const Text('Link to an upcoming Game (Optional)', style: AppTextStyles.headlineSmall),
+              Text(
+                'Link to an upcoming Game (Optional)',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               gamesAsync.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (_, __) => const Text('Failed to load upcoming games'),
+                error: (error, stackTrace) => const Text('Failed to load upcoming games'),
                 data: (games) {
                   return DropdownButtonFormField<String?>(
-                    value: _selectedGameId,
+                    initialValue: _selectedGameId,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     items: [
@@ -155,7 +169,7 @@ class _PostAnnouncementBottomSheetState extends ConsumerState<PostAnnouncementBo
       });
 
       ref.invalidate(groupAnnouncementsProvider(widget.groupId));
-      
+
       if (mounted) {
         Navigator.of(context).pop();
         showToast(context, 'Announcement posted successfully!');

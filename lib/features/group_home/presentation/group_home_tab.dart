@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:gameior/core/supabase/supabase_client.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/features/group_home/application/group_home_providers.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -31,6 +29,7 @@ class GroupHomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final contextAsync = ref.watch(groupContextProvider(groupId));
 
     return contextAsync.when(
@@ -44,11 +43,12 @@ class GroupHomeTab extends ConsumerWidget {
         final myRole = groupContext.myRole;
         final isAdmin = myRole == MemberRole.host || myRole == MemberRole.coHost;
 
-        final duesAsync = isAdmin 
+        final duesAsync = isAdmin
             ? ref.watch(adminDuesProvider(groupId))
             : ref.watch(playerDuesProvider(groupId));
 
         return RefreshIndicator(
+          color: theme.colorScheme.primary,
           onRefresh: () async {
             ref.invalidate(groupContextProvider(groupId));
             ref.invalidate(nextGroupGameProvider(groupId));
@@ -82,7 +82,7 @@ class GroupHomeTab extends ConsumerWidget {
                   }
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (error, stackTrace) => const SizedBox.shrink(),
               ),
 
               // 2. Next Session Card
@@ -90,7 +90,11 @@ class GroupHomeTab extends ConsumerWidget {
               const SizedBox(height: AppSpacing.base),
 
               // 3. Pinned Club Rules Card
-              ClubRulesCard(rules: group.clubRules ?? ''),
+              ClubRulesCard(
+                groupId: groupId,
+                rules: group.clubRules ?? '',
+                isAdmin: isAdmin,
+              ),
               const SizedBox(height: AppSpacing.base),
 
               // 4. Announcements List
@@ -103,12 +107,15 @@ class GroupHomeTab extends ConsumerWidget {
 
               // 5. Invite Members Card
               const SectionHeader(title: 'INVITE MEMBERS'),
+              const SizedBox(height: AppSpacing.xs),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.base),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -118,13 +125,19 @@ class GroupHomeTab extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Group Invite Code', style: AppTextStyles.bodySmall),
+                            Text(
+                              'Group Invite Code',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                             const SizedBox(height: 2),
                             SelectableText(
                               groupContext.inviteCode,
-                              style: AppTextStyles.displayMedium.copyWith(
-                                color: AppColors.primary,
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                color: theme.colorScheme.primary,
                                 letterSpacing: 2,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -132,7 +145,10 @@ class GroupHomeTab extends ConsumerWidget {
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.copy, color: AppColors.textSecondary),
+                              icon: Icon(
+                                Icons.copy,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                               onPressed: () {
                                 Clipboard.setData(ClipboardData(text: groupContext.inviteCode));
                                 showToast(context, 'Invite code copied to clipboard!');
@@ -140,14 +156,20 @@ class GroupHomeTab extends ConsumerWidget {
                             ),
                             if (isAdmin)
                               IconButton(
-                                icon: const Icon(Icons.refresh, color: AppColors.textSecondary),
+                                icon: Icon(
+                                  Icons.refresh,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                                 onPressed: () => _regenerateInviteCode(context, ref, groupId),
                               ),
                           ],
                         ),
                       ],
                     ),
-                    const Divider(height: AppSpacing.lg),
+                    Divider(
+                      height: AppSpacing.lg,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    ),
                     AppButton(
                       label: 'Share Invite Code',
                       variant: AppButtonVariant.primary,

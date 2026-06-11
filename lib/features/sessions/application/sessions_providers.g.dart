@@ -6,7 +6,7 @@ part of 'sessions_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$upcomingGamesHash() => r'0a2a1add341b6e8172713b01138482e17872baaf';
+String _$upcomingGamesHash() => r'312c61d80fd117bc045a0e875adc3cbba4ee1d9b';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -151,7 +151,7 @@ class _UpcomingGamesProviderElement
   String get groupId => (origin as UpcomingGamesProvider).groupId;
 }
 
-String _$pastGamesHash() => r'9a75cbc1ac090156d35c91b94c4cccad8357d9c8';
+String _$pastGamesHash() => r'8d7d291b6ed5c568e0e96e90828a4dbc70c71773';
 
 /// See also [pastGames].
 @ProviderFor(pastGames)

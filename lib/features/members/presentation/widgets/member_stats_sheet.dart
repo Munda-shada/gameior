@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/members/application/members_providers.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/shared/models/enums.dart';
@@ -30,12 +28,13 @@ class MemberStatsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(memberStatsProvider(groupId: groupId, userId: member.userId));
     final isAdmin = currentUserRole == MemberRole.host || currentUserRole == MemberRole.coHost;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -50,14 +49,14 @@ class MemberStatsSheet extends ConsumerWidget {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: AppSpacing.base),
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: theme.colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               Text(
                 '${member.displayName}\'s Profile',
-                style: AppTextStyles.headlineLarge,
+                style: theme.textTheme.headlineLarge,
               ),
               const SizedBox(height: AppSpacing.lg),
 

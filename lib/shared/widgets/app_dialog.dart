@@ -38,6 +38,7 @@ class AppDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: Text(title),
       content: Text(message),
@@ -48,7 +49,7 @@ class AppDialog extends StatelessWidget {
         ),
         TextButton(
           style: isDestructive
-              ? TextButton.styleFrom(foregroundColor: Colors.red)
+              ? TextButton.styleFrom(foregroundColor: theme.colorScheme.error)
               : null,
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),

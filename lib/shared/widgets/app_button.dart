@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Button
-enum AppButtonVariant { primary, secondary, destructive, ghost }
+enum AppButtonVariant { primary, secondary, destructive, ghost, custom }
 
 class AppButton extends StatelessWidget {
   final String label;
@@ -19,10 +19,17 @@ class AppButton extends StatelessWidget {
     this.isLoading = false,
     this.isFullWidth = true,
     this.leadingIcon,
+    this.backgroundColor,
+    this.foregroundColor,
   });
+
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -55,14 +62,23 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.destructive:
         button = ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
+            backgroundColor: theme.colorScheme.error,
+            foregroundColor: theme.colorScheme.onError,
           ),
           onPressed: isLoading ? null : onPressed,
           child: content,
         );
       case AppButtonVariant.ghost:
         button = TextButton(
+          onPressed: isLoading ? null : onPressed,
+          child: content,
+        );
+      case AppButtonVariant.custom:
+        button = ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+          ),
           onPressed: isLoading ? null : onPressed,
           child: content,
         );

@@ -10,16 +10,28 @@ class NotificationBell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final countAsync = ref.watch(unreadNotificationCountProvider);
+    final theme = Theme.of(context);
 
     return IconButton(
       icon: countAsync.when(
         data: (count) => Badge(
           isLabelVisible: count > 0,
           label: Text(count.toString()),
-          child: const Icon(Icons.notifications_none),
+          backgroundColor: theme.colorScheme.error,
+          textColor: theme.colorScheme.onError,
+          child: Icon(
+            Icons.notifications_none,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
-        loading: () => const Icon(Icons.notifications_none),
-        error: (_, __) => const Icon(Icons.notifications_none),
+        loading: () => Icon(
+          Icons.notifications_none,
+          color: theme.colorScheme.onSurface,
+        ),
+        error: (error, stackTrace) => Icon(
+          Icons.notifications_none,
+          color: theme.colorScheme.onSurface,
+        ),
       ),
       onPressed: () {
         showAppBottomSheet(

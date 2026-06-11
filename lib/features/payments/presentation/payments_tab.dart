@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 import 'package:gameior/shared/widgets/app_error_state.dart';

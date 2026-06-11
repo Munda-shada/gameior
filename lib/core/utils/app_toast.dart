@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
+
 
 void showToast(BuildContext context, String message, {bool isError = false}) {
+  final theme = Theme.of(context);
+
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(message, style: AppTextStyles.bodyMedium
-          .copyWith(color: Colors.white)),
-      backgroundColor: isError ? AppColors.destructive : AppColors.textPrimary,
+      content: Text(
+        message,
+        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary),
+      ),
+      backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.onSurface,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(AppSpacing.base),
       shape: RoundedRectangleBorder(

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
-import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/shared/widgets/app_text_field.dart';
 import 'package:gameior/shared/widgets/section_header.dart';
 
@@ -34,6 +32,8 @@ class RsvpSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,9 +41,9 @@ class RsvpSettingsSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -62,17 +62,17 @@ class RsvpSettingsSection extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               SwitchListTile.adaptive(
-                title: const Text('Allow Guest RSVPs', style: AppTextStyles.headlineSmall),
-                subtitle: const Text('Players can add +1 or more extra guests', style: AppTextStyles.bodySmall),
+                title: Text('Allow Guest RSVPs', style: theme.textTheme.headlineSmall),
+                subtitle: Text('Players can add +1 or more extra guests', style: theme.textTheme.bodySmall),
                 value: allowGuests,
-                activeColor: AppColors.primary,
+                activeColor: theme.colorScheme.primary,
                 contentPadding: EdgeInsets.zero,
                 onChanged: onAllowGuestsChanged,
               ),
               const Divider(height: AppSpacing.lg),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: Text('RSVP Deadline (Optional)', style: AppTextStyles.headlineSmall),
+                child: Text('RSVP Deadline (Optional)', style: theme.textTheme.headlineSmall),
               ),
               const SizedBox(height: AppSpacing.xs),
               Row(
@@ -82,7 +82,7 @@ class RsvpSettingsSection extends StatelessWidget {
                       onTap: onSelectRsvpDeadlineDate,
                       child: InputDecorator(
                         decoration: const InputDecoration(labelText: 'Deadline Date'),
-                        child: Text(rsvpDeadlineDate != null ? rsvpDateStr : 'None', style: AppTextStyles.bodyLarge),
+                        child: Text(rsvpDeadlineDate != null ? rsvpDateStr : 'None', style: theme.textTheme.bodyLarge),
                       ),
                     ),
                   ),
@@ -92,7 +92,7 @@ class RsvpSettingsSection extends StatelessWidget {
                       onTap: onSelectRsvpDeadlineTime,
                       child: InputDecorator(
                         decoration: const InputDecoration(labelText: 'Deadline Time'),
-                        child: Text(rsvpDeadlineTime != null ? rsvpTimeStr : 'None', style: AppTextStyles.bodyLarge),
+                        child: Text(rsvpDeadlineTime != null ? rsvpTimeStr : 'None', style: theme.textTheme.bodyLarge),
                       ),
                     ),
                   ),
@@ -103,7 +103,10 @@ class RsvpSettingsSection extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: onClearDeadline,
-                    child: const Text('Clear Deadline', style: TextStyle(color: AppColors.destructive)),
+                    child: Text(
+                      'Clear Deadline',
+                      style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.error),
+                    ),
                   ),
                 ),
             ],

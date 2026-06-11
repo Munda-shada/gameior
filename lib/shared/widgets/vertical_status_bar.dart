@@ -10,6 +10,7 @@ class VerticalStatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Color statusColor;
 
     switch (status.toLowerCase()) {
@@ -17,18 +18,18 @@ class VerticalStatusBar extends StatelessWidget {
       case 'confirmed':
       case 'paid':
       case 'completed':
-        statusColor = Colors.green;
+        statusColor = theme.colorScheme.primary;
       case 'waitlist':
       case 'waitlisted':
       case 'maybe':
       case 'pending_verification':
-        statusColor = Colors.orange;
+        statusColor = theme.colorScheme.tertiary;
       case 'no':
       case 'cancelled':
       case 'rejected':
-        statusColor = Colors.red;
+        statusColor = theme.colorScheme.error;
       default:
-        statusColor = Colors.grey.shade400;
+        statusColor = theme.colorScheme.outline;
     }
 
     return Container(
