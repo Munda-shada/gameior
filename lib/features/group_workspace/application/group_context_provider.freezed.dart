@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GroupContext {
 
- Group get group; MemberRole get myRole; MembershipStatus get myStatus; String get inviteCode;
+ Group get group; MemberRole get myRole; MembershipStatus get myStatus; String get inviteCode; bool get notificationsEnabled;
 /// Create a copy of GroupContext
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $GroupContextCopyWith<GroupContext> get copyWith => _$GroupContextCopyWithImpl<G
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupContext&&(identical(other.group, group) || other.group == group)&&(identical(other.myRole, myRole) || other.myRole == myRole)&&(identical(other.myStatus, myStatus) || other.myStatus == myStatus)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GroupContext&&(identical(other.group, group) || other.group == group)&&(identical(other.myRole, myRole) || other.myRole == myRole)&&(identical(other.myStatus, myStatus) || other.myStatus == myStatus)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.notificationsEnabled, notificationsEnabled) || other.notificationsEnabled == notificationsEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,group,myRole,myStatus,inviteCode);
+int get hashCode => Object.hash(runtimeType,group,myRole,myStatus,inviteCode,notificationsEnabled);
 
 @override
 String toString() {
-  return 'GroupContext(group: $group, myRole: $myRole, myStatus: $myStatus, inviteCode: $inviteCode)';
+  return 'GroupContext(group: $group, myRole: $myRole, myStatus: $myStatus, inviteCode: $inviteCode, notificationsEnabled: $notificationsEnabled)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $GroupContextCopyWith<$Res>  {
   factory $GroupContextCopyWith(GroupContext value, $Res Function(GroupContext) _then) = _$GroupContextCopyWithImpl;
 @useResult
 $Res call({
- Group group, MemberRole myRole, MembershipStatus myStatus, String inviteCode
+ Group group, MemberRole myRole, MembershipStatus myStatus, String inviteCode, bool notificationsEnabled
 });
 
 
@@ -62,13 +62,14 @@ class _$GroupContextCopyWithImpl<$Res>
 
 /// Create a copy of GroupContext
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? group = null,Object? myRole = null,Object? myStatus = null,Object? inviteCode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? group = null,Object? myRole = null,Object? myStatus = null,Object? inviteCode = null,Object? notificationsEnabled = null,}) {
   return _then(_self.copyWith(
 group: null == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group,myRole: null == myRole ? _self.myRole : myRole // ignore: cast_nullable_to_non_nullable
 as MemberRole,myStatus: null == myStatus ? _self.myStatus : myStatus // ignore: cast_nullable_to_non_nullable
 as MembershipStatus,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,notificationsEnabled: null == notificationsEnabled ? _self.notificationsEnabled : notificationsEnabled // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of GroupContext
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode,  bool notificationsEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GroupContext() when $default != null:
-return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _:
+return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode,_that.notificationsEnabled);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode,  bool notificationsEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _GroupContext():
-return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _:
+return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode,_that.notificationsEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Group group,  MemberRole myRole,  MembershipStatus myStatus,  String inviteCode,  bool notificationsEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _GroupContext() when $default != null:
-return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _:
+return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode,_that.notificationsEnabled);case _:
   return null;
 
 }
@@ -218,13 +219,14 @@ return $default(_that.group,_that.myRole,_that.myStatus,_that.inviteCode);case _
 
 
 class _GroupContext implements GroupContext {
-  const _GroupContext({required this.group, required this.myRole, required this.myStatus, required this.inviteCode});
+  const _GroupContext({required this.group, required this.myRole, required this.myStatus, required this.inviteCode, required this.notificationsEnabled});
   
 
 @override final  Group group;
 @override final  MemberRole myRole;
 @override final  MembershipStatus myStatus;
 @override final  String inviteCode;
+@override final  bool notificationsEnabled;
 
 /// Create a copy of GroupContext
 /// with the given fields replaced by the non-null parameter values.
@@ -236,16 +238,16 @@ _$GroupContextCopyWith<_GroupContext> get copyWith => __$GroupContextCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupContext&&(identical(other.group, group) || other.group == group)&&(identical(other.myRole, myRole) || other.myRole == myRole)&&(identical(other.myStatus, myStatus) || other.myStatus == myStatus)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GroupContext&&(identical(other.group, group) || other.group == group)&&(identical(other.myRole, myRole) || other.myRole == myRole)&&(identical(other.myStatus, myStatus) || other.myStatus == myStatus)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.notificationsEnabled, notificationsEnabled) || other.notificationsEnabled == notificationsEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,group,myRole,myStatus,inviteCode);
+int get hashCode => Object.hash(runtimeType,group,myRole,myStatus,inviteCode,notificationsEnabled);
 
 @override
 String toString() {
-  return 'GroupContext(group: $group, myRole: $myRole, myStatus: $myStatus, inviteCode: $inviteCode)';
+  return 'GroupContext(group: $group, myRole: $myRole, myStatus: $myStatus, inviteCode: $inviteCode, notificationsEnabled: $notificationsEnabled)';
 }
 
 
@@ -256,7 +258,7 @@ abstract mixin class _$GroupContextCopyWith<$Res> implements $GroupContextCopyWi
   factory _$GroupContextCopyWith(_GroupContext value, $Res Function(_GroupContext) _then) = __$GroupContextCopyWithImpl;
 @override @useResult
 $Res call({
- Group group, MemberRole myRole, MembershipStatus myStatus, String inviteCode
+ Group group, MemberRole myRole, MembershipStatus myStatus, String inviteCode, bool notificationsEnabled
 });
 
 
@@ -273,13 +275,14 @@ class __$GroupContextCopyWithImpl<$Res>
 
 /// Create a copy of GroupContext
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? group = null,Object? myRole = null,Object? myStatus = null,Object? inviteCode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? group = null,Object? myRole = null,Object? myStatus = null,Object? inviteCode = null,Object? notificationsEnabled = null,}) {
   return _then(_GroupContext(
 group: null == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group,myRole: null == myRole ? _self.myRole : myRole // ignore: cast_nullable_to_non_nullable
 as MemberRole,myStatus: null == myStatus ? _self.myStatus : myStatus // ignore: cast_nullable_to_non_nullable
 as MembershipStatus,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,notificationsEnabled: null == notificationsEnabled ? _self.notificationsEnabled : notificationsEnabled // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

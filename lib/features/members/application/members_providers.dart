@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gameior/features/members/data/members_repository.dart';
 import 'package:gameior/features/members/domain/member.dart';
 import 'package:gameior/features/members/domain/member_stats.dart';
+import 'package:gameior/features/members/domain/audit_log.dart';
 import 'package:gameior/features/group_workspace/application/group_context_provider.dart';
 import 'package:gameior/shared/models/enums.dart';
 
@@ -78,3 +79,13 @@ Future<MemberStats> memberStats(MemberStatsRef ref, {required String groupId, re
     userId: userId,
   );
 }
+
+@riverpod
+Future<List<AuditLog>> groupAuditLogs(GroupAuditLogsRef ref, String groupId) async {
+  return ref.watch(membersRepositoryProvider).fetchAuditLogs(groupId);
+}
+
+final groupHasUnpaidDuesProvider = FutureProvider.family<bool, String>((ref, groupId) async {
+  final repo = ref.read(membersRepositoryProvider);
+  return repo.hasGroupUnpaidDues(groupId: groupId);
+});

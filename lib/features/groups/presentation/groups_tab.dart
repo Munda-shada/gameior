@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gameior/core/theme/app_spacing.dart';
+import 'package:gameior/core/theme/app_text_styles.dart';
 import 'package:gameior/features/groups/application/groups_provider.dart';
 import 'package:gameior/features/groups/domain/group.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gameior/core/theme/app_colors.dart';
 import 'package:gameior/core/router/route_names.dart';
 import 'package:gameior/features/groups/presentation/widgets/join_group_bottom_sheet.dart';
+import 'package:gameior/features/groups/presentation/widgets/group_card.dart';
+
+import 'package:gameior/shared/widgets/app_loading_shimmer.dart';
+import 'package:gameior/shared/widgets/app_error_state.dart';
+import 'package:gameior/shared/widgets/app_bottom_sheet.dart';
+import 'package:gameior/shared/widgets/app_button.dart';
 
 class GroupsTab extends ConsumerWidget {
   const GroupsTab({super.key});
@@ -40,27 +47,23 @@ class GroupsTab extends ConsumerWidget {
         ],
       ),
       body: groupsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                child: Text('Failed to load groups:\n$e', 
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(myGroupsNotifierProvider),
-                child: const Text('Retry'),
-              ),
-            ],
+        loading: () => const SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.base),
+            child: Column(
+              children: [
+                AppLoadingShimmer(type: ShimmerType.card),
+                SizedBox(height: AppSpacing.base),
+                AppLoadingShimmer(type: ShimmerType.card),
+                SizedBox(height: AppSpacing.base),
+                AppLoadingShimmer(type: ShimmerType.card),
+              ],
+            ),
           ),
+        ),
+        error: (e, stack) => AppErrorState(
+          message: 'Failed to load groups: $e',
+          onRetry: () => ref.invalidate(myGroupsNotifierProvider),
         ),
         data: (groups) {
           if (groups.isEmpty) return _buildEmptyState(context);
@@ -72,38 +75,35 @@ class GroupsTab extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.groups_outlined, size: 64, color: Colors.grey),
-          const SizedBox(height: AppSpacing.md),
-          const Text("You're not in any groups yet"),
-          const SizedBox(height: AppSpacing.md),
-          ElevatedButton(
-            onPressed: () => context.push(Routes.createGroup),
-            child: const Text('Create a Group'),
-          ),
-          TextButton(
-            onPressed: () => _showJoinSheet(context),
-            child: const Text('Join with Code'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.groups_outlined, size: 64, color: AppColors.textDisabled),
+            const SizedBox(height: AppSpacing.md),
+            const Text("You're not in any groups yet", style: AppTextStyles.headlineSmall),
+            const SizedBox(height: AppSpacing.md),
+            AppButton(
+              label: 'Create a Group',
+              onPressed: () => context.push(Routes.createGroup),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(
+              label: 'Join with Code',
+              variant: AppButtonVariant.ghost,
+              onPressed: () => _showJoinSheet(context),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _showJoinSheet(BuildContext context) {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-        ),
-        child: const JoinGroupBottomSheet(),
-      ),
+      child: const JoinGroupBottomSheet(),
     );
   }
 
@@ -145,91 +145,8 @@ class GroupsTab extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.grey,
-        ),
-      ),
-    );
-  }
-}
-
-class GroupCard extends StatelessWidget {
-  final GroupSummary group;
-
-  const GroupCard({super.key, required this.group});
-
-  @override
-  Widget build(BuildContext context) {
-    final isAdmin = group.myRole.name == 'host' || group.myRole.name == 'coHost';
-    final hasPendingDues = group.pendingDuesPaise > 0;
-    final hasPendingFromPlayers = group.pendingFromPlayersPaise > 0 && isAdmin;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/group/${group.id}'),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.base),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      group.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right, color: Colors.grey),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Members: ${group.memberCount}',
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              if (hasPendingDues || hasPendingFromPlayers) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.xs,
-                  runSpacing: AppSpacing.xs,
-                  children: [
-                    if (hasPendingDues)
-                      _buildDuesBadge(
-                        'You owe ₹${(group.pendingDuesPaise / 100).toStringAsFixed(0)}',
-                        Colors.red,
-                      ),
-                    if (hasPendingFromPlayers)
-                      _buildDuesBadge(
-                        'To collect ₹${(group.pendingFromPlayersPaise / 100).toStringAsFixed(0)}',
-                        Colors.blue,
-                      ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDuesBadge(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
+        style: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textSecondary,
           fontWeight: FontWeight.bold,
         ),
       ),
